@@ -1,1 +1,3 @@
 src/*.o
+*.tar.gz
+VCBART/*.Rhistory
