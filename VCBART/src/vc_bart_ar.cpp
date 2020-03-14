@@ -30,13 +30,13 @@ Rcpp::List vc_BART_ar(arma::vec Y, // n_train x 1 ... concatenation of all obser
                       arma::vec n_vec_test, // number of observations per individual (testing)
                       arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
                       Rcpp::List xinfo_list, // cutpoints for z
+                      size_t m, // number of trees
                       arma::vec sigma_mu_vec, // vector of length p containing prior standard deviation of leaf parameters
                       arma::vec alpha_vec, // vector of alphas used in tree split probabilitiy
                       arma::vec beta_vec, // vector of betas used in tree split probability
                       size_t burn = 1000, size_t nd = 1000,
                       double rho = 0.9,
                       double sigma_hat = 1.0,
-                      size_t m = 50,
                       bool ht_sigma_y = true, bool ht_sigma_mu = false,
                       double nu_sigma = 7, double nu_sigma_mu = 7, double variance_prob = 0.9,
                       bool verbose = false, size_t print_every = 500)
@@ -399,7 +399,7 @@ Rcpp::List vc_BART_ar(arma::vec Y, // n_train x 1 ... concatenation of all obser
   results["beta_test_samples"] = beta_test_samples;
   results["sigma_samples"] = sigma_samples;
   results["time"] = time2 - time1;
-  results["rho_samples"] = rho_samples;
-  if(ht_sigma_mu == true) results["sigma_mu_samples"] = sigma_mu_samples;
+  //results["rho_samples"] = rho_samples;
+  //if(ht_sigma_mu == true) results["sigma_mu_samples"] = sigma_mu_samples;
   return(results);
 }
