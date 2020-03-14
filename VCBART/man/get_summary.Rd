@@ -23,7 +23,7 @@ get_summary(chain1, chain2, burn = 250)
 \value{
 A list with three named elements, ``train'', ``test'', and ``sigma.''. The last, ``sigma'', contains the post-burn-in samples of sigma. Each of ``train'' and ``test'' are themselves lists with the following elements:
 \item{fit}{A matrix containing the mean, standard deviation, lower 2.5\% quantile, and upper 97.5\% quantile of the regression function.}
-\item{beta}{An array containing the mean, standard deviation, lower 2.5\% quantile, and upper 96.5\% quantile of each covariate effect function. The second dimension of the array corresponds to the different functions}
+\item{beta}{An array containing the mean, standard deviation, lower 2.5\% quantile, and upper 96.5\% quantile of each covariate effect function. The third dimension of the array corresponds to the different functions}
 \item{ystar}{A matrix containing the mean, standard deviation, lower 2.5\% quantile, and upper 97.5\% quantile of the posterior predictive distribution.}
 }
 \references{
@@ -31,15 +31,4 @@ A list with three named elements, ``train'', ``test'', and ``sigma.''. The last,
 }
 \author{
 Sameer K. Deshpande
-}
-
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x) 
-{
-  }
 }

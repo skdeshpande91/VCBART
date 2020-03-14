@@ -76,7 +76,3 @@ Sameer K. Deshpande
 
 \seealso{\code{\link{vc_bart_cs}} and \code{\link{vc_bart_ind}}}
 
-\examples{
-
-}
-
