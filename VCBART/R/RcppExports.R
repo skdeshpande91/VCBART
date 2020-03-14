@@ -3,7 +3,8 @@
 
 vc_BART_ar <- function(Y, X_train, Z_train, 
                        n_vec_train = c(nrow(X_train)), start_index_vec_train = c(1), 
-                       X_test, Z_test, n_vec_test = c(nrow(X_train)), start_index_vec_test = c(1), 
+                       X_test, Z_test, 
+                       n_vec_test = c(nrow(X_test)), start_index_vec_test = c(1), 
                        xinfo_list, m = 50, sigma_mu_vec = rep(1/sqrt(m), times = nrow(X_train)), 
                        alpha_vec = rep(0.95, times = ncol(X_train)), beta_vec = rep(2, times = ncol(X_train)), 
                        burn = 250L, nd = 1000L, 
@@ -16,7 +17,8 @@ vc_BART_ar <- function(Y, X_train, Z_train,
 
 vc_BART_cs <- function(Y, X_train, Z_train, 
                        n_vec_train = c(nrow(X_train)), start_index_vec_train = c(1), 
-                       X_test, Z_test, n_vec_test = c(nrow(X_train)), start_index_vec_test = c(1), 
+                       X_test, Z_test, 
+                       n_vec_test = c(nrow(X_test)), start_index_vec_test = c(1), 
                        xinfo_list, m = 50, sigma_mu_vec = rep(1/sqrt(m), times = nrow(X_train)), 
                        alpha_vec = rep(0.95, times = ncol(X_train)), beta_vec = rep(2, times = ncol(X_train)), 
                        burn = 250L, nd = 1000L, 
@@ -27,8 +29,10 @@ vc_BART_cs <- function(Y, X_train, Z_train,
     .Call(`_VCBART_vc_BART_cs`, Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, m, sigma_mu_vec, alpha_vec, beta_vec, burn, nd, rho, sigma_hat, ht_sigma_y, ht_sigma_mu, nu_sigma, nu_sigma_mu, variance_prob, verbose, print_every)
 }
 
-vc_BART_ind <- function(Y, X_train, Z_train, n_vec_train = rep(1, times = nrow(X_train)), start_index_vec_train = seq(1, nrow(X_train), by = 1), 
-                        X_test, Z_test, n_vec_test = rep(1, times = nrow(X_test)), start_index_vec_test = seq(1, nrow(X_test), by = 1), 
+vc_BART_ind <- function(Y, X_train, Z_train, 
+                        n_vec_train = c(nrow(X_train)), start_index_vec_train = c(1), 
+                        X_test, Z_test, 
+                        n_vec_test = c(nrow(X_test)), start_index_vec_test = c(1), 
                         xinfo_list, m = 50, sigma_mu_vec = rep(1/sqrt(m), times = ncol(X_train)), 
                         alpha_vec = rep(0.95, times = ncol(X_train)), beta_vec = rep(2, times = ncol(X_train)), 
                         burn = 250L, nd = 1000L, 

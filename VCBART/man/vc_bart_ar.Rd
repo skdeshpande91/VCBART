@@ -74,8 +74,7 @@ Sameer K. Deshpande
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 
-\seealso{\code{\link{vc_bart_cs}}}
-\seealso{\code{\link{vc_bart_ind}}}
+\seealso{\code{\link{vc_bart_cs}} and \code{\link{vc_bart_ind}}}
 
 \examples{
 

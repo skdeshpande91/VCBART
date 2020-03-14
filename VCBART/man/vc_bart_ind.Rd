@@ -9,8 +9,8 @@ The same function is used to fit a VC-BART model with independent errors in both
 }
 \usage{
 vc_BART_ind(Y, X_train, Z_train, 
-            n_vec_train = rep(1, times = nrow(X_train)), start_index_vec_train = seq(1, nrow(X_train), by = 1), 
-            X_test, Z_test, n_vec_test = rep(1, times = nrow(X_test)), start_index_vec_test = seq(1, nrow(X_test), by = 1), 
+            n_vec_train = c(nrow(X_train)), start_index_vec_train = c(1), 
+            X_test, Z_test, n_vec_test = c(nrow(X_test)), start_index_vec_test = c(1), 
             xinfo_list, m = 50, sigma_mu_vec = rep(1/sqrt(m), times = ncol(X_train)), 
             alpha_vec = rep(0.95, times = ncol(X_train)), beta_vec = rep(2, times = ncol(X_train)), 
             burn = 250L, nd = 1000L, 

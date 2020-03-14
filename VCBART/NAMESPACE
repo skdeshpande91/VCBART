@@ -1,3 +1,7 @@
-useDynLib(VCBART, .registration=TRUE)
+import('stats')
+import('graphics')
+import('grDevices')
 importFrom(Rcpp, evalCpp)
-exportPattern("^[[:alpha:]]+")
+export("vc_BART_ar", "vc_BART_cs", "vc_BART_ind", "get_summary")
+useDynLib(VCBART, '_VCBART_vc_BART_ar', '_VCBART_vc_BART_cs', '_VCBART_vc_BART_ind')
+

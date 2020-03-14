@@ -1,5 +1,5 @@
-\name{vc_bart_ar}
-\alias{vc_bart_ar}
+\name{vc_bart_cs}
+\alias{vc_bart_cs}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Function to fit a panel VC-BART model with compoundy symmetry-structured errors
@@ -72,8 +72,7 @@ Sameer K. Deshpande
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 
-\seealso{\code{\link{vc_bart_ar}}}
-\seealso{\code{\link{vc_bart_ind}}}
+\seealso{\code{\link{vc_bart_ar}} and \code{\link{vc_bart_ind}}}
 
 \examples{
 
