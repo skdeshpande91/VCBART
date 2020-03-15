@@ -17,6 +17,9 @@ devtools::install_github(repo = "skdeshpande91/VCBART/VCBART")
 
 #### Examples
 
+
+Scripts to reproduce some of the examples in the paper are avilable in the scripts/ directory.
+
 The following code chunk sets up a really basic example of `vc_BART_ind`, which fits a VC-BART model with independent errors.
 
 ```r
@@ -122,6 +125,5 @@ plot(beta1_test, fit_sum$test$beta[,"MEAN",2])
 ```
 
 
-Scripts to reproduce all of the examples in the paper are avilable in the scripts/ directory.
 
 

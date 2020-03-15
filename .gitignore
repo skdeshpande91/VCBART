@@ -1,3 +1,5 @@
 src/*.o
 *.tar.gz
 VCBART/*.Rhistory
+*.Rhistory
+data/*.RData
