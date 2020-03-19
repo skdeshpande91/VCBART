@@ -1,5 +1,5 @@
-\name{vc_bart_ar}
-\alias{vc_bart_ar}
+\name{vc_BART_ar}
+\alias{vc_BART_ar}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Function to fit a panel VC-BART model with first order auto-regressive (AR(1)) structured errors.
@@ -74,5 +74,5 @@ Sameer K. Deshpande
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 
-\seealso{\code{\link{vc_bart_cs}} and \code{\link{vc_bart_ind}}}
+\seealso{\code{\link{vc_BART_cs}} and \code{\link{vc_BART_ind}}}
 

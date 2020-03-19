@@ -1,41 +1,45 @@
-\name{vc_bart_ind}
-\alias{vc_bart_ind}
+\name{vc_BART_cs}
+\alias{vc_BART_cs}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Function to fit a VC-BART model with independent errors
+Function to fit a panel VC-BART model with compoundy symmetry-structured errors
 }
 \description{
-The same function is used to fit a VC-BART model with independent errors in both the cross-sectional and panel settings.
+Runs a conditional Gibbs sampler to draw the trees and residual standard deviation conditionally on a fixed autocorrelation parameter rho.
+Assumes a compound symmetry error correlation structure in which all off-diagonal entries in the subject-specific correlation matrix are equal to rho.
 }
 \usage{
-vc_BART_ind(Y, X_train, Z_train, 
-            n_vec_train = c(nrow(X_train)), start_index_vec_train = c(1), 
-            X_test, Z_test, n_vec_test = c(nrow(X_test)), start_index_vec_test = c(1), 
-            xinfo_list, m = 50, sigma_mu_vec = rep(1/sqrt(m), times = ncol(X_train)), 
-            alpha_vec = rep(0.95, times = ncol(X_train)), beta_vec = rep(2, times = ncol(X_train)), 
-            burn = 250L, nd = 1000L, 
-            sigma_hat = 1.0, ht_sigma_y = TRUE, ht_sigma_mu = FALSE, 
-            nu_sigma = 7, nu_sigma_mu = 7, variance_prob = 0.9, 
-            verbose = FALSE, print_every = 500L)
+vc_BART_cs(Y, X_train, Z_train, 
+           n_vec_train = c(nrow(X_train)), start_index_vec_train = c(1), 
+           X_test, Z_test, n_vec_test = c(nrow(X_train)), start_index_vec_test = c(1), 
+           xinfo_list, m = 50, sigma_mu_vec = rep(1/sqrt(m), times = nrow(X_train)), 
+           alpha_vec = rep(0.95, times = ncol(X_train)), beta_vec = rep(2, times = ncol(X_train)), 
+           burn = 250L, nd = 1000L, 
+           rho = 0.5, 
+           sigma_hat = 1.0, ht_sigma_y = TRUE, ht_sigma_mu = FALSE, 
+           nu_sigma = 7, nu_sigma_mu = 7, variance_prob = 0.9, 
+           verbose = FALSE, print_every = 500L)
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{Y}{Vector containing the training observations.}
   \item{X_train}{Matrix of covariates for training observations. Assumes that the first column contains all 1's, for the intercept.}
   \item{Z_train}{Matrix of effect modifiers for training observations.}
-  \item{n_vec_train}{Vector containing number of training obesrvations for each subject. Default is rep(1, times = nrow(X_train)).}
-  \item{start_index_train}{Vector of indices for first observation of each subject. Default is seq(1, times = nrow(X_train), by = 1).}
+  \item{n_vec_train}{Vector containing number of training obesrvations for each subject. Default is c(nrow(X_train)), corresponding to scenario in which all observations come from a single subject.}
+  \item{start_index_train}{Vector of indices for first observation of each subject. Default is c(1), corresponding to scenario in which all observatiosn come from a single subject.}
   \item{X_test}{Matrix of covariates for testing observations. Assumes that the first column contains all 1's, for the intercept.}
   \item{Z_test}{Matrix of effect modifiers for testing observations.}
-  \item{n_vec_test}{Vector containing number of testing observations for each subject. Default is rep(1, times = nrow(X_test)).}
-  \item{start_index_test}{Vector of indices for first observation of each subject. Default is seq(1, times = nrow(X_test), by = 1).}
+  \item{n_vec_test}{Vector containing number of testing observations for each subject. Default is c(nrow(X_test)).}
+  \item{start_index_test}{Vector of indices for first observation of each subject. Default is c(1).}
   \item{xinfo_list}{List of length R containing all allowable cutpoints for decision tree}
-  \item{m}{Number of trees used to approximate each beta_j. Default is 50.}
+  \item{m}{Number of trees used to approximate each beta_j Default is 50.}
   \item{sigma_mu_vec}{Vector of length p taining scale parameter for prior on jumps. Default is 1/sqrt(m), where m is number of trees}
   \item{alpha_vec}{Vector of length p containing the parameter alpha in the tree splitting probabilties. Default is a vector with constant entries 0.95}
   \item{beta_vec}{Vector of length p containing the parameter beta in the tree splitting probabilties. Default is a vector with constant entries 2}
   \item{burn}{Number of MCMC iteratiosn to discard as burn-in. Default is 1000.}
   \item{nd}{Number of MCMC samples to output. Default is 1000.}
+  \item{rho}{Value of autocorrelation parameter rho. Default is 0.5.}
   \item{sigma_hat}{Initial over-estimate of sigma. Default is one. Used only if ht_sigma_y = FALSE.}
   \item{ht_sigma_y}{Logical value indicating whether half-t prior should be used for sigma. Default is TRUE. Otherwise scaled inverse chi-squared prior is used.}
   \item{ht_sigma_mu}{Logical value indicating whether half-t prior should be used for sigma_mu. Default is FALSE.}
@@ -47,7 +51,7 @@ vc_BART_ind(Y, X_train, Z_train,
 %%     ~~Describe \code{x} here~~
 }
 \details{
-For panel data, the function assumes that the observations are listed sequentially for each subject. That is, if subject 1 has 5 training observations and subject 2 has 10 training observations, then the first 5 entires (resp. rows) of Y (resp. X_train, Z_train) are for subject 1 while the next 10 entries (resp. rows) of Y (resp. X_train, Z_train) are for subject 2. In this two-subject example, we would have n_vec_train = c(5,10) and start_index_train = c(1,6).
+
 }
 \value{
 A list containing
@@ -56,7 +60,7 @@ A list containing
 \item{beta_train_samples}{An nrow(X_train) x ncol(X_train) x nd array containing posterior samples of each covariate effect function evaluated at training observations.}
 \item{beta_test_samples}{An nrow(X_test) x ncol(X_test) x nd array containing posterior samples of each covariate effect function evaluated at testing observations.}
 \item{sigma_samples}{A vector of length nd containing posterior samples of sigma.}
-\item{time}{Run-time (in seconds) for the MCMC chain}
+\item{time}{Run-time (in seconds) of MCMC chain.}
 }
 \references{
 %% ~put references to the literature/web site here ~
@@ -67,8 +71,6 @@ Sameer K. Deshpande
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{\code{\link{vc_bart_ar}} and \code{\link{vc_bart_cs}}}
-\examples{
 
-}
+\seealso{\code{\link{vc_BART_ar}} and \code{\link{vc_BART_ind}}}
 
