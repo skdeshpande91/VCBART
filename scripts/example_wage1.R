@@ -31,6 +31,8 @@ chain2 <- vc_BART_ind(Y = Y_train, X_train = X_train, Z_train = Z_train,
                       nd = 1000, burn = 250, verbose = TRUE, print_every = 50)
 
 fit_sum <- get_summary(chain1, chain2)
+beta_samples <- cbind(vc_chain1$beta_test_samples[,2,], vc_chain2$beta_test_samples[,2,])
+
 
 ######
 # Fit to Mincer's original specification
@@ -41,6 +43,8 @@ lm_data[,"exper2"] <- lm_data[,"exper"] * lm_data[,"exper"]
 
 mincer_fit <- lm(Y ~ educ + exper + exper2, data = lm_data)
 marginal_fit <- lm(Y ~ educ, data = lm_data)
+
+save(beta_samples, fit_sum, mincer_fit, marginal_fit, file = "results/wage1_chains.RData")
 
 
 # female, white, married
