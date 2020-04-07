@@ -56,7 +56,7 @@ void bd_ind(tree &x, double &sigma, xinfo &xi, data_info &di, tree_prior_info &t
       if( (int)(c-1) < L){ // v exhausted in the new left child l, new upper limit would be c-1
         PGly = 0.0;
       } else{
-        PGly = tree_pi.alpha[di.k]/(1.0 + dnx+1.0, tree_pi.beta[di.k]);
+        PGly = tree_pi.alpha[di.k]/pow(1.0 + dnx+1.0, tree_pi.beta[di.k]);
       }
       if(U < (int)(c+1)){ // v exhausted in new right child, new lower limit would be c+1
         PGry = 0.0;
@@ -292,7 +292,7 @@ void bd_cs(tree &x, double &rho, double &sigma, xinfo &xi, data_info &di, tree_p
       if( (int)(c-1) < L){ // v exhausted in the new left child l, new upper limit would be c-1
         PGly = 0.0;
       } else{
-        PGly = tree_pi.alpha[di.k]/(1.0 + dnx+1.0, tree_pi.beta[di.k]);
+        PGly = tree_pi.alpha[di.k]/pow(1.0 + dnx+1.0, tree_pi.beta[di.k]);
       }
       if(U < (int)(c+1)){ // v exhausted in new right child, new lower limit would be c+1
         PGry = 0.0;
@@ -525,7 +525,7 @@ void bd_ar(tree &x, double &rho, double &sigma, xinfo &xi, data_info &di, tree_p
       if( (int)(c-1) < L){ // v exhausted in the new left child l, new upper limit would be c-1
         PGly = 0.0;
       } else{
-        PGly = tree_pi.alpha[di.k]/(1.0 + dnx+1.0, tree_pi.beta[di.k]);
+        PGly = tree_pi.alpha[di.k]/pow(1.0 + dnx+1.0, tree_pi.beta[di.k]);
       }
       if(U < (int)(c+1)){ // v exhausted in new right child, new lower limit would be c+1
         PGry = 0.0;
