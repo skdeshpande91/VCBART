@@ -2,6 +2,15 @@
 
 An R package for fitting a linear varying coefficient model using Bayesian Additive Regression Trees.
 
+## To-do (dev)
+
+1. Add sparse version (independent error and compound symmetry error)
+2. Change export names (e.g. .sparse_vcbart_ind) and add wrapper function
+3. Add comparison to vcrpart package.
+4. Adjust rho-sensitivity simulation (only do CS)
+5. Re-run p3R2, p5R5 simulation with more modifiers (to show off the sparsity-inducing behavior)
+
+
 ### Details
 
 #### Installation
