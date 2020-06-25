@@ -1,77 +1,46 @@
-# Make Figure 3
-# Must run example_wage1.R to get the two chains run on the entire wage 1 dataset
-# Must run simulation_wage1.R and compile_wage1.R to do the cross-validation predictive simulations
+# Make some figures about the predictive accuracy of VC-BART
+load("results/results_HRS.RData")
 
-load("results/wage1_chains.RData")
-load("results/results_wage1.RData")
+method_names <- c("vcbart_adapt", "vcbart_adapt_cs25", "vcbart_adapt_cs50", "vcbart_adapt_cs75",
+                  "lm", "boosted_tvcm", "bart", "extraTrees", "gbm")
 
-load("data/wage1.RData")
+#png("figures/hrs_performance.png", width = 6, height = 3, units = "in", res = 300)
+png("~/Documents/Research/vc_bart/figures/hrs_performance.png", 
+    width = 8, height = 4, units = "in", res =300)
+par(mar = c(4,1,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,2), 
+    cex.main = 1, cex.axis = 1, cex.lab = 1)
+boxplot.matrix(ystar_smse_test[method_names,], use.cols = FALSE, yaxt ="n",
+               horizontal = TRUE, ylim = c(0.7,1), pch = 16, cex = 0.5, medlwd = 0.75,
+               main = "Predictive performance", xlab = "", at = 1:9)
+mtext(text = "SMSE\n(a)", side = 1, line = 3, cex = 1)
+# add custom labels
+text(x = 0.9, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.9, y = 2, labels = expression("VC-BART"~(rho == 0.25)), cex = 0.95)
+text(x = 0.9, y = 3, labels = expression("VC-BART"~(rho == 0.5)), cex = 0.95)
+text(x = 0.9, y = 4, labels = expression("VC-BART"~(rho == 0.75)), cex = 0.95)
+text(x = 0.95, y = 5, labels = expression("lm"), cex = 0.95)
+text(x = 0.95, y = 6, labels = expression("BTVCM"), cex = 0.95)
+text(x = 0.95, y = 7, labels = expression("BART"), cex = 0.95)
+text(x = 0.95, y = 8, labels = expression("ERT"), cex = 0.95)
+text(x = 0.95, y = 9, labels = expression("GBM"), cex = 0.95)
 
-train_index <- 1:N
-X_train <- as.matrix(X_all[train_index,], nrow = length(train_index), ncol = p)
-Y_train <- Y_all[train_index]
-Z_train <- as.matrix(Z_all[train_index,], ncol = R)
-n_vec_train <- length(train_index)
-start_index_train <- 1
-
-fem_grid <- c(0,1)
-mar_grid <- c(0,1)
-nonwhite_grid <- c(0,1)
-tenure_grid <- 0:10
-exper_grid <- 1:40
-Z_test <- as.matrix(expand.grid("female"= fem_grid, "nonwhite" = nonwhite_grid, "married" = mar_grid, "tenure" = tenure_grid, "exper" = exper_grid))
-
-N_test <- nrow(Z_test)
-X_test <- matrix(sample(X_train[,1], size = N_test, replace = TRUE), nrow = N_test, ncol = 1) # just randomly sample some X's
-n_vec_test <- N_test
-start_index_test <- 1
-
-methods <- c("lm", "np", "tvcm", "bart", "rf", "gbm", "vc_bart")
-method_labs <- c("lm", "np", "bTVCM", "BART", "ERT", "GBM", "VC-BART")
-png("figures/wage1_beta_mse.png", width = 8, height = 4, units = "in", res = 600)
-par(mar = c(4,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.8, cex.lab = 0.8, cex.axis = 0.8, mfrow = c(1,2))
-
-plot(1, type = "n", xlim = c(0,8), ylim = c(0, max(ystar_mse_test_wage1[,methods])), 
-     ylab = "MSE", xlab = "Method", xaxt = "n", main = "Predictive Performance")
-boxplot(ystar_mse_test_wage1[,"lm"], at = 1, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-boxplot(ystar_mse_test_wage1[,"np"], at = 2, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-boxplot(ystar_mse_test_wage1[,"tvcm"], at = 3, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-boxplot(ystar_mse_test_wage1[,"bart"], at = 4, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-boxplot(ystar_mse_test_wage1[,"rf"], at = 5, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-boxplot(ystar_mse_test_wage1[,"gbm"], at = 6, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-boxplot(ystar_mse_test_wage1[,"vc_bart"], at  = 7, add = TRUE, pch = 16, cex = 0.5, medlwd = 0.5)
-axis(side = 1, at = 1:7, labels = rep("", times = 7), tick = TRUE)
-#axis(side = 1, at = 1:7, method_labs, cex = 0.775)
-
-# female, white, married
-index1_0 <- which(Z_test[,"female"] == 0 & Z_test[,"nonwhite"] == 1 & Z_test[,"married"] == 0 & Z_test[,"tenure"] == 0)
-index1_1 <- which(Z_test[,"female"] == 0 & Z_test[,"nonwhite"] == 1 & Z_test[,"married"] == 0 & Z_test[,"tenure"] == 5)
-index1_2 <- which(Z_test[,"female"] == 0 & Z_test[,"nonwhite"] == 1 & Z_test[,"married"] == 0 & Z_test[,"tenure"] == 10)
-
-# male, nonwhite, single
-index2_0 <- which(Z_test[,"female"] == 1 & Z_test[,"nonwhite"] == 0 & Z_test[,"married"] == 1 & Z_test[,"tenure"] == 0)
-index2_1 <- which(Z_test[,"female"] == 1 & Z_test[,"nonwhite"] == 0 & Z_test[,"married"] == 1 & Z_test[,"tenure"] == 5)
-index2_2 <- which(Z_test[,"female"] == 1 & Z_test[,"nonwhite"] == 0 & Z_test[,"married"] == 1 & Z_test[,"tenure"] == 10)
-
-plot(1, type = "n", xlim = c(5, 38), ylim = c(0, 16), xlab = "Experience", ylab = "Return (%)", main = "Return to Education")
-legend("topleft", legend = c( "Unmarried nonwhite male, 0 years in job", "Married white female, 5 years in job","Mincer Estimate"), col = c( "red","blue", "black"),
-       pch = c(17, 16, NA), lty = c(NA, NA, 2), cex = 0.75, bty = "n")
-
-abline(h = 100 * mincer_fit$coefficients["educ"], lty = 2)
-polygon(c(Z_test[index1_1, "exper"], rev(Z_test[index1_1, "exper"])),
-        100 * c(vc_sum$test$beta[index1_1, "L95",2], rev(vc_sum$test$beta[index1_1, "U95",2])),
-        col = rgb(0,0,1,1/5), border = NA)
-polygon(c(Z_test[index2_0, "exper"], rev(Z_test[index2_0, "exper"])),
-        100 * c(vc_sum$test$beta[index2_1, "L95",2], rev(vc_sum$test$beta[index2_1, "U95",2])),
-        col = rgb(1,0,0,1/5), border = NA)
-
-lines(Z_test[index1_1, "exper"], 100 * vc_sum$test$beta[index1_1, "MEAN",2], col = 'blue') # white married female, 5 years on the job
-lines(Z_test[index2_0, "exper"], 100 * vc_sum$test$beta[index2_0, "MEAN", 2], col = 'red') # nonwhite single male, 0 years of experience
-
-points(Z_test[index1_1, "exper"], 100 * vc_sum$test$beta[index1_1, "MEAN",2], pch = 16, col = 'blue', cex = 0.5)
-points(Z_test[index2_0, "exper"], 100 * vc_sum$test$beta[index2_0, "MEAN",2], pch = 17, col = 'red', cex = 0.5)
-
-
+boxplot.matrix(ystar_cov_test[method_names,], use.cols = FALSE, yaxt ="n",
+               horizontal = TRUE, ylim = c(0.7,1), pch = 16, cex = 0.5, medlwd = 0.75,
+               main = "Predictive interval coverage", xlab = "")
+mtext(text = "Coverage\n(b)", side = 1, line = 3, cex = 1)
+text(x = 0.775, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.775, y = 2, labels = expression("VC-BART"~(rho == 0.25)), cex = 0.95)
+text(x = 0.775, y = 3, labels = expression("VC-BART"~(rho == 0.5)), cex = 0.95)
+text(x = 0.775, y = 4, labels = expression("VC-BART"~(rho == 0.75)), cex = 0.95)
+text(x = 0.75, y = 5, labels = expression("lm"), cex = 0.95)
+text(x = 0.75, y = 6, labels = expression("BTVCM"), cex = 0.95)
+text(x = 0.75, y = 7, labels = expression("BART"), cex = 0.95)
+text(x = 0.75, y = 8, labels = expression("ERT"), cex = 0.95)
+text(x = 0.75, y = 9, labels = expression("GBM"), cex = 0.95)
+abline(v = 0.95, col = 'red', lty = 2)
 dev.off()
 
 
+#boxplot.matrix(ystar_int_test[method_names,], use.cols = FALSE, yaxt ="n",
+#               horizontal = TRUE, ylim = c(0.6,1.2), pch = 16, cex = 0.8, medlwd = 0.75,
+#               main = "Uncertainty Interval Length", xlab = "Relative Length")

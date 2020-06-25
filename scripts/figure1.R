@@ -1,162 +1,242 @@
-# Script to re-create figure 1 of the main text
+###
+# Update 8 June 2020:
+# Figure 1: should 2 x 4. Top row shows beta0 -- beta3. Bottom rows adds in the VC-BART estimates and credible intervals
+# Figure 2: side-by-side of the smse.
 
-library(VCBART)
-load("data/p3R2_data.RData")
+load("results/illustration_p5R20.RData")
+#load("results/sim_p5R20/results_p5R20.RData")
 
-# run on the full dataset
-# add a column of 1's to X_all for the intercept
-X_all <- cbind(rep(1, times = N), X_all)
+############
+# Figure 1 is 2 x 4
+############
 
-chain1 <- vc_BART_ind(Y = Y_all, X_train = X_all, Z_train = Z_all,
-                      X_test = X_all, Z_test = Z_all, xinfo_list = cutpoints, 
-                      nd = 1000, burn = 250, verbose = TRUE, print_every = 50)
+#png("figures/p5R20_beta.png", width = 8, height = 4, units = "in", res = 300)
+png("~/Documents/Research/vc_bart/figures/p5R20_beta.png", width = 8, height = 4, units = "in", res = 300)
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.lab = 0.9, cex.axis = 0.9, mfrow = c(2,4))
 
-chain2 <- vc_BART_ind(Y = Y_all, X_train = X_all, Z_train = Z_all,
-                      X_test = X_all, Z_test = Z_all, xinfo_list = cutpoints, 
-                      nd = 1000, burn = 250, verbose = TRUE, print_every = 50)
+# Plot 1: beta0
+ix0 <- which(Z_plot[,2] < 0.5)
+ix1 <- which(Z_plot[,2] >= 0.5)
+plot0_ix0 <- ix0[order(Z_plot[ix0,1])]
+plot0_ix1 <- ix1[order(Z_plot[ix1,1])]
+ylim0 <- max(abs(c(beta_plot[,1], beta0_hat[,c("L95", "U95")])))
 
-fit_sum <- get_summary(chain1, chain2)
+plot(1,type= "n", xlim = c(0,1), ylim = c(-1.05, 1.05) * ylim0,
+     main = expression("Intercept"), ylab = expression(beta[0]), xlab = expression(Z[1]))
+lines(Z_plot[plot0_ix0,1], beta_plot[plot0_ix0,1])
+lines(Z_plot[plot0_ix1,1], beta_plot[plot0_ix1,1], col = 'black', lty = 2)
+legend("bottomright", cex = 0.8, legend = expression(Z[2] == 0), lty = 2, bty = "n")
+legend("topleft", cex = 0.8, legend = expression(Z[2] == 1), lty = 1, bty = "n")
 
-beta0_hat <- fit_sum$train$beta[,,1]
-beta1_hat <- fit_sum$train$beta[,,2]
-beta2_hat <- fit_sum$train$beta[,,3]
-beta3_hat <- fit_sum$train$beta[,,4]
+# Plot 2: beta1
+plot1_ix <- order(Z_plot[,1])
+ylim1 <- max(abs(c(beta_plot[,2], beta1_hat[,c("L95", "U95")])))
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim1,
+     main = expression("Effect of"~X[1]), xlab = expression(Z[1]), ylab = expression(beta[1]))
+lines(Z_plot[plot1_ix,1], beta_plot[plot1_ix,2])
 
-ylim0 <- max(abs(c(beta0_all, beta0_hat)))
-ylim1 <- max(abs(c(beta1_all, beta1_hat)))
-ylim2 <- max(abs(c(beta2_all, beta2_hat)))
-ylim3 <- max(abs(c(beta3_all, beta3_hat)))
+# Plot 3 beta2
+ix0 <- which(Z_plot[,1] > 0.6)
+ix1 <- which(Z_plot[,1] <= 0.25)
+ix2 <- which(Z_plot[,1] > 0.25 & Z_plot[,1] < 0.6)
 
-ylim_all <- max(ylim0, ylim1, ylim2, ylim3)
+plot2_ix0 <- ix0[order(Z_plot[ix0,1])]
+plot2_ix1 <- ix1[order(Z_plot[ix1,1])]
+plot2_ix2 <- ix2[order(Z_plot[ix2,1])]
 
-png("figures/beta_p3R2.png", width = 6.5, height = 3.25, units = "in", res = 600)
-par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(2,4), cex.main = 0.95, cex.lab = 0.95, cex.axis = 0.9)
+ylim2 <- max(abs(c(beta_plot[,3], beta2_hat[,c("L95", "U95")])))
 
-# The true function beta_0
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("True intercept"), ylab = expression(beta[0]), xlab = expression(Z[1]))
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim2,
+     main = expression("Effect of"~X[2]), xlab = expression(Z[1]), ylab = expression(beta[2]))
 
-ix0 <- which(Z_all[,2] < 0.5)
-ix1 <- which(Z_all[,2] >= 0.5)
+lines(Z_plot[plot2_ix0,1], beta_plot[plot2_ix0, 3])
+lines(Z_plot[plot2_ix1,1], beta_plot[plot2_ix1, 3])
+lines(Z_plot[plot2_ix2,1], beta_plot[plot2_ix2, 3])
 
-plot0_ix0 <- ix0[order(Z_all[ix0,1])]
-plot0_ix1 <- ix1[order(Z_all[ix1,1])]
+# Plot 4: beta3
+plot3_ix <- order(Z_plot[,1])
+ylim3 <- max(abs(c(beta_plot[,4], beta3_hat[,c("L95", "U95")])))
 
-lines(Z_all[plot0_ix0,1], beta0_all[plot0_ix0], col = 'black')
-lines(Z_all[plot0_ix1,1], beta0_all[plot0_ix1], col = 'black', lty = 2)
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim3,
+     main = expression("Effect of"~X[3]), xlab = expression(Z[1]), ylab = expression(beta[3]))
+lines(Z_plot[plot3_ix,1], beta_plot[plot3_ix,4])
 
-legend("bottomright", cex = 0.8, legend = expression(Z[2] >= 0.5), lty = 2, bty = "n")
-legend("topleft", cex = 0.8, legend = expression(Z[2] < 0.5), lty = 1, bty = "n")
+# Plot 5: beta0 & VC-BART estimates
+# Plot 5: beta0 + VC-BART estimates
+ix0 <- which(Z_plot[,2] < 0.5)
+ix1 <- which(Z_plot[,2] >= 0.5)
+plot0_ix0 <- ix0[order(Z_plot[ix0,1])]
+plot0_ix1 <- ix1[order(Z_plot[ix1,1])]
+ylim0 <- max(abs(c(beta_plot[,1], beta0_hat[,c("L95", "U95")])))
 
-# The true function beta_1
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("True effect of"~X[1]), 
-     ylab = expression(beta[1]), xlab = expression(Z[1]))
-plot1_ix <- order(Z_all[,1])
-lines(Z_all[plot1_ix,1], beta1_all[plot1_ix], col = 'black')
+plot(1,type= "n", xlim = c(0,1), ylim = c(-1.05, 1.05) * ylim0,
+     main = expression("Intercept"), ylab = expression(beta[0]), xlab = expression(Z[1]))
+lines(Z_plot[plot0_ix0,1], beta_plot[plot0_ix0,1])
+lines(Z_plot[plot0_ix1,1], beta_plot[plot0_ix1,1], col = 'black', lty = 2)
 
-
-# The true function beta_2
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("True effect of"~X[2]), 
-     ylab = expression(beta[2]), xlab = expression(Z[1]))
-
-ix0 <- which(Z_all[,1] > 0.6)
-ix1 <- which(Z_all[,1] < 0.25)
-ix2 <- which(Z_all[,1] >= 0.25 & Z_all[,1] <= 0.6)
-
-
-plot2_ix0 <- ix0[order(Z_all[ix0,1])]
-plot2_ix1 <- ix1[order(Z_all[ix1,1])]
-plot2_ix2 <- ix2[order(Z_all[ix2,1])]
-
-
-lines(Z_all[plot2_ix0,1], beta2_all[plot2_ix0], col = 'black')
-lines(Z_all[plot2_ix1,1], beta2_all[plot2_ix1], col = 'black')
-lines(Z_all[plot2_ix2,1], beta2_all[plot2_ix2], col = 'black')
-
-
-# The true function beta_3
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("True effect of"~X[3]), 
-     ylab = expression(beta[3]), xlab = expression(Z[1]))
-plot1_ix <- order(Z_all[,1])
-
-lines(Z_all[plot1_ix,1], beta3_all[plot1_ix], col = 'black')
-
-# Estimate of beta_0
-
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("Estimated intercept"), ylab = expression(beta[0]), xlab = expression(Z[1]))
-
-ix0 <- which(Z_all[,2] < 0.5)
-ix1 <- which(Z_all[,2] >= 0.5)
-plot0_ix0 <- ix0[order(Z_all[ix0,1])]
-plot0_ix1 <- ix1[order(Z_all[ix1,1])]
-polygon(c(Z_all[plot0_ix0,1], rev(Z_all[plot0_ix0,1])),
-        c(beta0_hat[plot0_ix0,"L95"], rev(beta0_hat[plot0_ix0,"U95"])),
+polygon(c(Z_plot[plot0_ix0,1], rev(Z_plot[plot0_ix0,1])),
+        c(beta0_hat[plot0_ix0,"L95"], rev(beta0_hat[plot0_ix0, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
-polygon(c(Z_all[plot0_ix1,1], rev(Z_all[plot0_ix1,1])),
-        c(beta0_hat[plot0_ix1,"L95"], rev(beta0_hat[plot0_ix1,"U95"])),
+polygon(c(Z_plot[plot0_ix1,1], rev(Z_plot[plot0_ix1,1])),
+        c(beta0_hat[plot0_ix1,"L95"], rev(beta0_hat[plot0_ix1, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
+lines(Z_plot[plot0_ix0,1], beta0_hat[plot0_ix0,"MEAN"], col = 'blue')
+lines(Z_plot[plot0_ix1,1], beta0_hat[plot0_ix1,"MEAN"], col = 'blue', lty = 2)
 
-lines(Z_all[plot0_ix0,1], beta0_all[plot0_ix0], col = 'black')
-lines(Z_all[plot0_ix0,1], beta0_hat[plot0_ix0], col = 'blue')
 
-lines(Z_all[plot0_ix1,1], beta0_all[plot0_ix1], col = 'black', lty = 2)
-lines(Z_all[plot0_ix1,1], beta0_hat[plot0_ix1], col = 'blue', lty = 2)
-legend("bottomright", cex = 0.8, legend = expression(Z[2] >= 0.5), lty = 2, bty = "n")
-legend("topleft", cex = 0.8, legend = expression(Z[2] < 0.5), lty = 1, bty = "n")
+legend("bottomright", cex = 0.8, legend = expression(Z[2] == 0), lty = 2, bty = "n")
+legend("topleft", cex = 0.8, legend = expression(Z[2] == 1), lty = 1, bty = "n")
 
-# Estimate of beta1
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("Estimated effect of"~X[1]), 
-     ylab = expression(beta[1]), xlab = expression(Z[1]))
-plot1_ix <- order(Z_all[,1])
+# Plot 6: beta1 plus VC-BART results
+plot1_ix <- order(Z_plot[,1])
+ylim1 <- max(abs(c(beta_plot[,2], beta1_hat[,c("L95", "U95")])))
 
-polygon(c(Z_all[plot1_ix,1], rev(Z_all[plot1_ix,1])),
-        c(beta1_hat[plot1_ix,"L95"], rev(beta1_hat[plot1_ix,"U95"])),
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim1,
+     main = expression("Effect of"~X[1]), xlab = expression(Z[1]), ylab = expression(beta[1]))
+polygon(c(Z_plot[plot1_ix,1], rev(Z_plot[plot1_ix,1])),
+        c(beta1_hat[plot1_ix,"L95"], rev(beta1_hat[plot1_ix, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
+lines(Z_plot[plot1_ix,1], beta1_hat[plot1_ix,"MEAN"], col = 'blue')
+lines(Z_plot[plot1_ix,1], beta_plot[plot1_ix,2])
 
-lines(Z_all[plot1_ix,1], beta1_all[plot1_ix], col = 'black')
-lines(Z_all[plot1_ix,1], beta1_hat[plot1_ix], col = 'blue')
+# Plot 7: beta2 & VC-BART results
+ix0 <- which(Z_plot[,1] > 0.6)
+ix1 <- which(Z_plot[,1] <= 0.25)
+ix2 <- which(Z_plot[,1] > 0.25 & Z_plot[,1] < 0.6)
 
-# Estimate of beta2
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01, 1.01) * ylim_all, main = expression("Estimated effect of"~X[2]), 
-     ylab = expression(beta[2]), xlab = expression(Z[1]))
+plot2_ix0 <- ix0[order(Z_plot[ix0,1])]
+plot2_ix1 <- ix1[order(Z_plot[ix1,1])]
+plot2_ix2 <- ix2[order(Z_plot[ix2,1])]
 
-ix0 <- which(Z_all[,1] > 0.6)
-ix1 <- which(Z_all[,1] < 0.25)
-ix2 <- which(Z_all[,1] >= 0.25 & Z_all[,1] <= 0.6)
+ylim2 <- max(abs(c(beta_plot[,3], beta2_hat[,c("L95", "U95")])))
 
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim2,
+     main = expression("Effect of"~X[2]), xlab = expression(Z[1]), ylab = expression(beta[2]))
 
-plot2_ix0 <- ix0[order(Z_all[ix0,1])]
-plot2_ix1 <- ix1[order(Z_all[ix1,1])]
-plot2_ix2 <- ix2[order(Z_all[ix2,1])]
-
-
-polygon(c(Z_all[plot2_ix0,1], rev(Z_all[plot2_ix0,1])),
-        c(beta2_hat[plot2_ix0,"L95"], rev(beta2_hat[plot2_ix0,"U95"])),
+polygon(c(Z_plot[plot2_ix0,1], rev(Z_plot[plot2_ix0,1])),
+        c(beta2_hat[plot2_ix0,"L95"], rev(beta2_hat[plot2_ix0, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
-polygon(c(Z_all[plot2_ix1,1], rev(Z_all[plot2_ix1,1])),
-        c(beta2_hat[plot2_ix1,"L95"], rev(beta2_hat[plot2_ix1,"U95"])),
+polygon(c(Z_plot[plot2_ix1,1], rev(Z_plot[plot2_ix1,1])),
+        c(beta2_hat[plot2_ix1,"L95"], rev(beta2_hat[plot2_ix1, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
-polygon(c(Z_all[plot2_ix2,1], rev(Z_all[plot2_ix2,1])),
-        c(beta2_hat[plot2_ix2,"L95"], rev(beta2_hat[plot2_ix2,"U95"])),
+polygon(c(Z_plot[plot2_ix2,1], rev(Z_plot[plot2_ix2,1])),
+        c(beta2_hat[plot2_ix2,"L95"], rev(beta2_hat[plot2_ix2, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
+lines(Z_plot[plot2_ix0,1], beta2_hat[plot2_ix0, "MEAN"], col = 'blue')
+lines(Z_plot[plot2_ix1,1], beta2_hat[plot2_ix1, "MEAN"], col = 'blue')
+lines(Z_plot[plot2_ix2,1], beta2_hat[plot2_ix2, "MEAN"], col = 'blue')
 
-lines(Z_all[plot2_ix0,1], beta2_all[plot2_ix0], col = 'black')
-lines(Z_all[plot2_ix1,1], beta2_all[plot2_ix1], col = 'black')
-lines(Z_all[plot2_ix2,1], beta2_all[plot2_ix2], col = 'black')
+lines(Z_plot[plot2_ix0,1], beta_plot[plot2_ix0, 3])
+lines(Z_plot[plot2_ix1,1], beta_plot[plot2_ix1, 3])
+lines(Z_plot[plot2_ix2,1], beta_plot[plot2_ix2, 3])
 
-lines(Z_all[plot2_ix0,1], beta2_hat[plot2_ix0], col = 'blue')
-lines(Z_all[plot2_ix1,1], beta2_hat[plot2_ix1], col = 'blue')
-lines(Z_all[plot2_ix2,1], beta2_hat[plot2_ix2], col = 'blue')
+# Plot 8: beta3 & VC-BART results
+plot3_ix <- order(Z_plot[,1])
+ylim3 <- max(abs(c(beta_plot[,4], beta3_hat[,c("L95", "U95")])))
 
-# Estimate of beta3
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.01,1.01) * ylim_all, main = expression("Estimated effect of"~X[3]), 
-     ylab = expression(beta[3]), xlab = expression(Z[1]))
-plot1_ix <- order(Z_all[,1])
-
-polygon(c(Z_all[plot1_ix,1], rev(Z_all[plot1_ix,1])),
-        c(beta3_hat[plot1_ix,"L95"], rev(beta3_hat[plot1_ix,"U95"])),
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim3,
+     main = expression("Effect of"~X[3]), xlab = expression(Z[1]), ylab = expression(beta[3]))
+polygon(c(Z_plot[plot3_ix,1], rev(Z_plot[plot3_ix,1])),
+        c(beta3_hat[plot3_ix,"L95"], rev(beta3_hat[plot3_ix, "U95"])),
         col = rgb(0,0,1,1/3), border = NA)
-
-lines(Z_all[plot1_ix,1], beta3_all[plot1_ix], col = 'black')
-lines(Z_all[plot1_ix,1], beta3_hat[plot1_ix], col = 'blue')
+lines(Z_plot[plot3_ix,1], beta3_hat[plot3_ix,"MEAN"], col = 'blue')
+lines(Z_plot[plot3_ix,1], beta_plot[plot3_ix,4])
 
 dev.off()
+
+layout_mat <- matrix(NA, nrow = 4, ncol = 16)
+
+layout_mat[1:2,1:2] <- 1 # beta0
+layout_mat[1:2, 3:4] <- 2 # beta1
+layout_mat[3:4, 1:2] <- 3 # beta2
+layout_mat[3:4, 3:4] <- 4 # beta3
+layout_mat[1:2, 5:6] <- 5 # beta0 + VCBART estimates
+layout_mat[1:2, 7:8] <- 6 # beta1 + VCBART estimates
+layout_mat[3:4, 5:6] <- 7 # beta2 + VCBART estimates
+layout_mat[3:4, 7:8] <- 8 # beta3 + VCBART estimates
+layout_mat[1:4, 9:12] <- 9 # beta mse
+layout_mat[1:4, 13:16] <- 10 # ystar smse
+
+
+
+layout(mat = layout_mat)
+
+###### 
+# Just plot the original betas
+######
+
+png("figures/beta_p5R20.png", width = 4, height = 4, units = "in", res = 300)
+# Plot 1: beta0
+
+# Plot 2: beta1
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.8, cex.lab = 0.8, cex.axis = 0.8)
+plot1_ix <- order(Z_plot[,1])
+ylim1 <- max(abs(c(beta_plot[,2], beta1_hat[,c("L95", "U95")])))
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim1,
+     main = expression("Effect of"~X[1]), xlab = expression(Z[1]), ylab = expression(beta[1]))
+lines(Z_plot[plot1_ix,1], beta_plot[plot1_ix,2])
+
+# Plot 3 beta2
+ix0 <- which(Z_plot[,1] > 0.6)
+ix1 <- which(Z_plot[,1] <= 0.25)
+ix2 <- which(Z_plot[,1] > 0.25 & Z_plot[,1] < 0.6)
+
+plot2_ix0 <- ix0[order(Z_plot[ix0,1])]
+plot2_ix1 <- ix1[order(Z_plot[ix1,1])]
+plot2_ix2 <- ix2[order(Z_plot[ix2,1])]
+
+ylim2 <- max(abs(c(beta_plot[,3], beta2_hat[,c("L95", "U95")])))
+
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim2,
+     main = expression("Effect of"~X[2]), xlab = expression(Z[1]), ylab = expression(beta[2]))
+
+lines(Z_plot[plot2_ix0,1], beta_plot[plot2_ix0, 3])
+lines(Z_plot[plot2_ix1,1], beta_plot[plot2_ix1, 3])
+lines(Z_plot[plot2_ix2,1], beta_plot[plot2_ix2, 3])
+
+# Plot 4: beta3
+plot3_ix <- order(Z_plot[,1])
+ylim3 <- max(abs(c(beta_plot[,4], beta3_hat[,c("L95", "U95")])))
+
+plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim3,
+     main = expression("Effect of"~X[3]), xlab = expression(Z[1]), ylab = expression(beta[3]))
+lines(Z_plot[plot3_ix,1], beta_plot[plot3_ix,4])
+dev.off()
+
+######
+# Plot true beta's with VC-BART estimates
+######
+png("figures/beta_hat_p5R20.png", width = 4, height = 4, units = "in", res = 300)
+# Plot 1: beta0
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.lab = 0.9, cex.axis = 0.9, mfrow = c(2,2))
+
+
+dev.off()
+
+
+#######
+# Plot the MSE for overall beta recovery
+#######
+
+png("figures/beta_mse_p5R20.png", width = 4, height = 4, units = "in", res = 300)
+par(mar = c(3,1,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.axis = 0.9, cex.lab = 0.9)
+
+beta_mse_mean <- apply(beta_mse_test, FUN = mean, MARGIN = c(1,3))
+boxplot.matrix(beta_mse_mean, use.cols = FALSE, horizontal = TRUE, ylim = c(0,10),
+               pch = 16, cex = 0.5, medlwd = 0.5, names = NA, 
+               main = expression("Covariate effect recovery performance"), xlab = "MSE", yaxt = "n")
+dev.off()
+# Plot 10: plot the ystar_smse_results
+png("figures/ystar_smse_p5R20.png", width = 4, height = 4, units = "in", res = 300)
+par(mar = c(3,1,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.axis = 0.9, cex.lab = 0.9)
+boxplot.matrix(ystar_smse_test, use.cols = FALSE, horizontal = TRUE, ylim = c(0,0.3),
+               pch = 16, cex = 0.5, medlwd = 0.5, name = NA,
+               main = expression("Predictive performance"), xlab = "SMSE", yaxt = "n")
+dev.off()
+# Plot beta1 and VC-BART results
+
+# Plot beta2 and VC-BART results
+
+##########
+# Plot beta3 and VC-BART results
+

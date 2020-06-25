@@ -24,27 +24,27 @@ bart_summary <- function(chain1, chain2)
   
   
   
-  ypred_summary_train <- matrix(nrow = N_train, ncol = 4, dimnames = list(c(), c("MEAN", "SD", "L95", "U95")))
-  ypred_summary_test <- matrix(nrow = N_test, ncol = 4, dimnames = list(c(), c("MEAN", "SD", "L95", "U95")))
+  ystar_summary_train <- matrix(nrow = N_train, ncol = 4, dimnames = list(c(), c("MEAN", "SD", "L95", "U95")))
+  ystar_summary_test <- matrix(nrow = N_test, ncol = 4, dimnames = list(c(), c("MEAN", "SD", "L95", "U95")))
   
   
   for(i in 1:N_train){
-    tmp_ypred_train <- f_samples_train[i,] + sigma_samples * rnorm(ncol(f_samples_train), 0, 1)
-    ypred_summary_train[i,"MEAN"] <- mean(tmp_ypred_train)
-    ypred_summary_train[i,"SD"] <- sd(tmp_ypred_train)
-    ypred_summary_train[i,"L95"] <- quantile(tmp_ypred_train, probs = 0.025)
-    ypred_summary_train[i,"U95"] <- quantile(tmp_ypred_train, probs = 0.975)
+    tmp_ystar_train <- f_samples_train[i,] + sigma_samples * rnorm(ncol(f_samples_train), 0, 1)
+    ystar_summary_train[i,"MEAN"] <- mean(tmp_ystar_train)
+    ystar_summary_train[i,"SD"] <- sd(tmp_ystar_train)
+    ystar_summary_train[i,"L95"] <- quantile(tmp_ystar_train, probs = 0.025)
+    ystar_summary_train[i,"U95"] <- quantile(tmp_ystar_train, probs = 0.975)
   }
   
   for(i in 1:N_test){
-    tmp_ypred_test <- f_samples_test[i,] + sigma_samples * rnorm(ncol(f_samples_test), 0, 1)
-    ypred_summary_test[i,"MEAN"] <- mean(tmp_ypred_test)
-    ypred_summary_test[i,"SD"] <- sd(tmp_ypred_test)
-    ypred_summary_test[i,"L95"] <- quantile(tmp_ypred_test, probs = 0.025)
-    ypred_summary_test[i,"U95"] <- quantile(tmp_ypred_test, probs = 0.975)
+    tmp_ystar_test <- f_samples_test[i,] + sigma_samples * rnorm(ncol(f_samples_test), 0, 1)
+    ystar_summary_test[i,"MEAN"] <- mean(tmp_ystar_test)
+    ystar_summary_test[i,"SD"] <- sd(tmp_ystar_test)
+    ystar_summary_test[i,"L95"] <- quantile(tmp_ystar_test, probs = 0.025)
+    ystar_summary_test[i,"U95"] <- quantile(tmp_ystar_test, probs = 0.975)
   }
   
-  return(list(train = list(fit = fit_summary_train, ystar = ypred_summary_train),
-              test = list(fit = fit_summary_test, ystar = ypred_summary_test)))
+  return(list(train = list(fit = fit_summary_train, ystar = ystar_summary_train),
+              test = list(fit = fit_summary_test, ystar = ystar_summary_test)))
   
 }

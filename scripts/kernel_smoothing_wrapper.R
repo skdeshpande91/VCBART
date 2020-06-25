@@ -5,8 +5,8 @@
 # fit_summary_ gives the point estimate, SE returned by npscoef, and approximate CI for E[y | x,z]
 # ypred_summary_ gives the point estimate and upper/lower 95 prediction interval. Here we just point estimate +/- 2 * RMSE.
 
-
-kernel_smoothing <- function(Y_train, cov_train, mod_train, cov_test, mod_test, B = 50)
+library(np)
+kernel_smoothing_wrapper <- function(Y_train, cov_train, mod_train, cov_test, mod_test, B = 50)
 {
   n_train <- nrow(cov_train)
   n_test <- nrow(cov_test)
@@ -82,7 +82,7 @@ kernel_smoothing <- function(Y_train, cov_train, mod_train, cov_test, mod_test, 
         rmse_train <- sqrt(mean( (Y_train - ystar_summary_train[,"MEAN"])^2 ))
         
         ystar_summary_train[,"L95"] <- ystar_summary_train[,"MEAN"] - qnorm(0.975) * rmse_train
-        ystar_summary_train[,"U95"] <- ystar_summary_train[,"MEAN"] + qnorm(0.97) * rmse_train
+        ystar_summary_train[,"U95"] <- ystar_summary_train[,"MEAN"] + qnorm(0.975) * rmse_train
         
         ystar_summary_test[,"MEAN"] <- ks_fit$mean[(1 + n_train):(n_test + n_train)]
         ystar_summary_test[,"L95"] <- ystar_summary_test[,"MEAN"] - qnorm(0.975) * rmse_train
