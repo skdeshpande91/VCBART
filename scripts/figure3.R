@@ -5,8 +5,9 @@ method_names <- c("vcbart_adapt", "vcbart_adapt_cs25", "vcbart_adapt_cs50", "vcb
                   "lm", "boosted_tvcm", "bart", "extraTrees", "gbm")
 
 #png("figures/hrs_performance.png", width = 6, height = 3, units = "in", res = 300)
-png("~/Documents/Research/vc_bart/figures/hrs_performance.png", 
-    width = 8, height = 8*1/3, units = "in", res =300)
+#png("~/Documents/Research/vc_bart/figures/hrs_performance.png", width = 8, height = 8*1/3, units = "in", res =400)
+png("figures/hrs_performance.png", width = 8, height = 8*1/3, units = "in", res =400)
+
 par(mar = c(4,1,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,3), 
     cex.main = 1.5, cex.axis = 1, cex.lab = 1)
 boxplot.matrix(ystar_rmse_test[method_names,], use.cols = FALSE, yaxt ="n",
@@ -90,9 +91,3 @@ text(x = 0.75, y = 9, labels = expression("GBM"), cex = 0.8)
 abline(v = 0.95, col = 'red', lty = 2)
 
 dev.off()
-
-
-
-#boxplot.matrix(ystar_int_test[method_names,], use.cols = FALSE, yaxt ="n",
-#               horizontal = TRUE, ylim = c(0.6,1.2), pch = 16, cex = 0.8, medlwd = 0.75,
-#               main = "Uncertainty Interval Length", xlab = "Relative Length")

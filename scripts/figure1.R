@@ -1,17 +1,11 @@
-###
-# Update 8 June 2020:
-# Figure 1: should 2 x 4. Top row shows beta0 -- beta3. Bottom rows adds in the VC-BART estimates and credible intervals
-# Figure 2: side-by-side of the smse.
 
 load("results/illustration_p5R20.RData")
-#load("results/sim_p5R20/results_p5R20.RData")
 
 ############
 # Figure 1 is 2 x 4
 ############
 
-#png("figures/p5R20_beta.png", width = 8, height = 4, units = "in", res = 300)
-png("~/Documents/Research/vc_bart/figures/p5R20_beta.png", width = 8, height = 4, units = "in", res = 300)
+png("figures/p5R20_beta.png", width = 8, height = 4, units = "in", res = 400)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.lab = 0.9, cex.axis = 0.9, mfrow = c(2,4))
 
 # Plot 1: beta0
@@ -143,100 +137,3 @@ lines(Z_plot[plot3_ix,1], beta3_hat[plot3_ix,"MEAN"], col = 'blue')
 lines(Z_plot[plot3_ix,1], beta_plot[plot3_ix,4])
 
 dev.off()
-
-layout_mat <- matrix(NA, nrow = 4, ncol = 16)
-
-layout_mat[1:2,1:2] <- 1 # beta0
-layout_mat[1:2, 3:4] <- 2 # beta1
-layout_mat[3:4, 1:2] <- 3 # beta2
-layout_mat[3:4, 3:4] <- 4 # beta3
-layout_mat[1:2, 5:6] <- 5 # beta0 + VCBART estimates
-layout_mat[1:2, 7:8] <- 6 # beta1 + VCBART estimates
-layout_mat[3:4, 5:6] <- 7 # beta2 + VCBART estimates
-layout_mat[3:4, 7:8] <- 8 # beta3 + VCBART estimates
-layout_mat[1:4, 9:12] <- 9 # beta mse
-layout_mat[1:4, 13:16] <- 10 # ystar smse
-
-
-
-layout(mat = layout_mat)
-
-###### 
-# Just plot the original betas
-######
-
-png("figures/beta_p5R20.png", width = 4, height = 4, units = "in", res = 300)
-# Plot 1: beta0
-
-# Plot 2: beta1
-par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.8, cex.lab = 0.8, cex.axis = 0.8)
-plot1_ix <- order(Z_plot[,1])
-ylim1 <- max(abs(c(beta_plot[,2], beta1_hat[,c("L95", "U95")])))
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim1,
-     main = expression("Effect of"~X[1]), xlab = expression(Z[1]), ylab = expression(beta[1]))
-lines(Z_plot[plot1_ix,1], beta_plot[plot1_ix,2])
-
-# Plot 3 beta2
-ix0 <- which(Z_plot[,1] > 0.6)
-ix1 <- which(Z_plot[,1] <= 0.25)
-ix2 <- which(Z_plot[,1] > 0.25 & Z_plot[,1] < 0.6)
-
-plot2_ix0 <- ix0[order(Z_plot[ix0,1])]
-plot2_ix1 <- ix1[order(Z_plot[ix1,1])]
-plot2_ix2 <- ix2[order(Z_plot[ix2,1])]
-
-ylim2 <- max(abs(c(beta_plot[,3], beta2_hat[,c("L95", "U95")])))
-
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim2,
-     main = expression("Effect of"~X[2]), xlab = expression(Z[1]), ylab = expression(beta[2]))
-
-lines(Z_plot[plot2_ix0,1], beta_plot[plot2_ix0, 3])
-lines(Z_plot[plot2_ix1,1], beta_plot[plot2_ix1, 3])
-lines(Z_plot[plot2_ix2,1], beta_plot[plot2_ix2, 3])
-
-# Plot 4: beta3
-plot3_ix <- order(Z_plot[,1])
-ylim3 <- max(abs(c(beta_plot[,4], beta3_hat[,c("L95", "U95")])))
-
-plot(1, type = "n", xlim = c(0,1), ylim = c(-1.05, 1.05)*ylim3,
-     main = expression("Effect of"~X[3]), xlab = expression(Z[1]), ylab = expression(beta[3]))
-lines(Z_plot[plot3_ix,1], beta_plot[plot3_ix,4])
-dev.off()
-
-######
-# Plot true beta's with VC-BART estimates
-######
-png("figures/beta_hat_p5R20.png", width = 4, height = 4, units = "in", res = 300)
-# Plot 1: beta0
-par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.lab = 0.9, cex.axis = 0.9, mfrow = c(2,2))
-
-
-dev.off()
-
-
-#######
-# Plot the MSE for overall beta recovery
-#######
-
-png("figures/beta_mse_p5R20.png", width = 4, height = 4, units = "in", res = 300)
-par(mar = c(3,1,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.axis = 0.9, cex.lab = 0.9)
-
-beta_mse_mean <- apply(beta_mse_test, FUN = mean, MARGIN = c(1,3))
-boxplot.matrix(beta_mse_mean, use.cols = FALSE, horizontal = TRUE, ylim = c(0,10),
-               pch = 16, cex = 0.5, medlwd = 0.5, names = NA, 
-               main = expression("Covariate effect recovery performance"), xlab = "MSE", yaxt = "n")
-dev.off()
-# Plot 10: plot the ystar_smse_results
-png("figures/ystar_smse_p5R20.png", width = 4, height = 4, units = "in", res = 300)
-par(mar = c(3,1,2,1), mgp = c(1.8, 0.5, 0), cex.main = 0.9, cex.axis = 0.9, cex.lab = 0.9)
-boxplot.matrix(ystar_smse_test, use.cols = FALSE, horizontal = TRUE, ylim = c(0,0.3),
-               pch = 16, cex = 0.5, medlwd = 0.5, name = NA,
-               main = expression("Predictive performance"), xlab = "SMSE", yaxt = "n")
-dev.off()
-# Plot beta1 and VC-BART results
-
-# Plot beta2 and VC-BART results
-
-##########
-# Plot beta3 and VC-BART results
-
