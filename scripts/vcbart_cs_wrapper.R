@@ -1,5 +1,6 @@
 # wrapper for VCBART
-library(VCBARTdev)
+#library(VCBARTdev)
+library(VCBART)
 vcbart_cs_wrapper <- function(Y_train, 
                               X_train, Z_train, n_train,
                               X_test, Z_test, n_test,

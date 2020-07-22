@@ -2,13 +2,18 @@
 
 An R package for fitting a linear varying coefficient model using Bayesian Additive Regression Trees.
 
-## To-do (dev)
 
-1. Add sparse version (independent error and compound symmetry error)
-2. Change export names (e.g. .sparse_vcbart_ind) and add wrapper function
-3. Add comparison to vcrpart package.
-4. Adjust rho-sensitivity simulation (only do CS)
-5. Re-run p3R2, p5R5 simulation with more modifiers (to show off the sparsity-inducing behavior)
+For more details about the VC-BART procedure, see [our paper](https://arxiv.org/abs/2003.06416).
+
+
+This is the development branch.
+If you just want to use VC-BART, you should download the package source that is available on the main branch.
+A copy of that package source is maintained in the directory VCBART.
+
+The directory VCBARTdev is a prototype package in which updates and other development occurs.
+Do not install directly from that source. 
+
+
 
 
 ### Details

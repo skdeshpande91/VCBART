@@ -104,4 +104,4 @@ for(sim_number in 1:N_sim){
 
 save(beta_mse_train, beta_mse_test, beta_cov_train, beta_cov_test, beta_int_train, beta_int_test,
      ystar_rmse_train, ystar_rmse_test, ystar_smse_train, ystar_smse_test, 
-     ystar_cov_train, ystar_cov_test, ystar_int_train, ystar_int_test, file = paste0("results/sim_p5R20_rho75/results_p5R20_rho75.RData"))
+     ystar_cov_train, ystar_cov_test, ystar_int_train, ystar_int_test, timing, file = paste0("results/sim_p5R20_rho75/results_p5R20_rho75.RData"))
