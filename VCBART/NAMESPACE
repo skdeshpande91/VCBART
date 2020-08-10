@@ -1,7 +1,6 @@
-import('stats')
-import('graphics')
-import('grDevices')
-importFrom(Rcpp, evalCpp)
-export("vc_BART_ar", "vc_BART_cs", "vc_BART_ind", "get_summary")
-useDynLib(VCBART, '_VCBART_vc_BART_ar', '_VCBART_vc_BART_cs', '_VCBART_vc_BART_ind')
+export("VCBART")
+export("get_beta_support")
+export("summarize_beta")
+export("summarize_posterior_predictive")
+useDynLib(VCBART)
 

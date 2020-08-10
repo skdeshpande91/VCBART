@@ -1,5 +1,8 @@
-src/*.o
 *.tar.gz
 VCBART/*.Rhistory
 *.Rhistory
 data/*.RData
+VCBART/src/*.o
+VCBARTdev/src/*.o
+results/*.RData
+testing/*

@@ -2,6 +2,20 @@
 
 An R package for fitting a linear varying coefficient model using Bayesian Additive Regression Trees.
 
+
+For more details about the VC-BART procedure, see [our paper](https://arxiv.org/abs/2003.06416).
+
+
+This is the development branch.
+If you just want to use VC-BART, you should download the package source that is available on the main branch.
+A copy of that package source is maintained in the directory VCBART.
+
+The directory VCBARTdev is a prototype package in which updates and other development occurs.
+Do not install directly from that source. 
+
+
+
+
 ### Details
 
 #### Installation
@@ -20,21 +34,17 @@ devtools::install_github(repo = "skdeshpande91/VCBART/VCBART")
 
 Scripts to reproduce some of the examples in the paper are avilable in the scripts/ directory.
 
-The following code chunk sets up a really basic example of `vc_BART_ind`, which fits a VC-BART model with independent errors.
+The following code chunk shows how to run VCBART  with independent errors and adaptive split probabilities.
 
 ```r
 library(VCBART)
 library(MASS)
 
 n <- 1 # A single subject
-N <- 2500 # total number of observations
+N <- 500 # total number of observations
 p <- 3
 R <- 2
 sigma <- 1
-
-####################################
-# True covariate effect functions
-####################################
 
 beta0_true <- function(Z){
   return( 3 * Z[,1] + (2 - 5 * (Z[,2] > 0.5)) * sin(pi * Z[,1]) - 2 * (Z[,2] > 0.5))
@@ -102,28 +112,47 @@ beta2_test <- beta2_all[test_index]
 beta3_test <- beta3_all[test_index]
 
 
-# Add a column for the intercept
-X_train <- cbind(rep(1, times = nrow(X_train)), X_train)
-X_test <- cbind(rep(1, times = nrow(X_test)), X_test)
 
-cutpoints <- list(seq(0,1,length = 10000),  c(0,1))
+n_train <- nrow(X_train)
+n_test <- nrow(X_test)
 
-chain1 <- vc_BART_ind(Y = Y_train, X_train = X_train, Z_train = Z_train,
-                      X_test = X_test, Z_test = Z_test, xinfo_list = cutpoints, verbose = TRUE, print_every = 50)
-chain2 <- vc_BART_ind(Y = Y_train, X_train = X_train, Z_train = Z_train,
-                      X_test = X_test, Z_test = Z_test, xinfo_list = cutpoints, verbose = TRUE, print_every = 50)
+cutpoints <- list(seq(0,1, length = 10000), c(0,1))
 
-fit_sum <- get_summary(chain1, chain2)
 
-#######
-# Make a plot of actual testing responses against posterior predictive mean
-plot(Y_test, fit_sum$test$ystar[,"MEAN"])
+##########################
+# Run 2 chains of VCBART
+##########################
 
-# Make a plot of actual beta1 values plotted against posterior means (on testing data)
-# Note that the indexing is off-set by 1.
-plot(beta1_test, fit_sum$test$beta[,"MEAN",2])
+chain1 <- VCBART(Y_train, X_train, Z_train, n_train,
+                 X_test, Z_test, n_test, cutpoints,
+                 intercept = TRUE, M = 50, error_structure = "ind", 
+                 split_probs_type = "adaptive", ht_sigma_y = TRUE,
+                 nd = 1000, burn = 500, verbose = TRUE, print_every = 50)
+
+chain2 <- VCBART(Y_train, X_train, Z_train, n_train,
+                 X_test, Z_test, n_test, cutpoints,
+                 intercept = TRUE, M = 50, error_structure = "ind", 
+                 split_probs_type = "adaptive", ht_sigma_y = TRUE,
+                 nd = 1000, burn = 500, verbose = TRUE, print_every = 50)
+
+################
+# Compute posterior mean and credible intervals for beta_j
+# Compute posterior predictive mean and 95% predictive intervals
+# Perfor modifier selection
+################
+
+beta_summary <- summarize_beta(chain1, chain2, burn = 500)
+ystar_summary <- summarize_posterior_predictive(chain1, chain2, burn = 500)
+beta_support <- get_beta_support(chain1, chain2, burn = burn, max_cutoff = 10)
+
+# Plot the actual out-of-sample observations against the posterior predictive means
+plot(Y_test, ystar_summary$test[,"MEAN"])
+
+# Plot the values of beta1 against the posterior means
+plot(beta1_test, beta_summary$test[,"MEAN",2])
+
+# Check the median probability models for cut-off of 1
+# We select Z_1 and Z_2 for beta0, Z_1 for beta_1, Z_1, for beta_2, and Z_1 & Z_2 for beta_3
+
+beta_support$support[[1]]
 ```
-
-
-
-

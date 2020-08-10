@@ -1,110 +1,106 @@
-load("data/philly_cc_shp.Rdata")
-source("scripts/maps_function.R")
+# Figure 4
+# Effects of individual covariates for HRS data
+load("data/HRS/HRS_all.RData")
+load("results/vcbart_hrs_all.RData")
 
-library(ggplot2)
-library(dplyr)
-library(gridExtra)
-library(scales)
-library(RColorBrewer)
-philly_cc_fort <- fortify(philly_cc_poly)
+# vector of distinct ages for hypothetical individuals
+age_plot <- Z_plot[1:544,"age"]
 
-load("results/philly_cs_0.RData")
-load("data/philly_monthly_cc.RData")
-n <- 255
-p <- ncol(X_train) + 1
-# Collect the means 
-beta_mean_train <- array(dim = c(n, 42, p), dimnames = list(c(), c(), c("intercept", colnames(X_train))))
-beta_mean_test <- array(dim = c(n, 6, p), dimnames = list(c(), c(), c("intercept", colnames(X_train))))
-
-beta_L95_train <- array(dim = c(n, 42, p), dimnames = list(c(), c(), c("intercept", colnames(X_train))))
-beta_L95_test <- array(dim = c(n, 6, p), dimnames = list(c(), c(), c("intercept", colnames(X_train))))
-
-beta_U95_train <- array(dim = c(n, 42, p), dimnames = list(c(), c(), c("intercept", colnames(X_train))))
-beta_U95_test <- array(dim = c(n, 6, p), dimnames = list(c(), c(), c("intercept", colnames(X_train))))
-
-for(i in 1:n){
-  beta_mean_train[i,,] <- cs_rho0_sum$train$beta[start_index_train[i]:(start_index_train[i] + n_vec_train[i] - 1),"MEAN",]
-  beta_mean_test[i,,] <- cs_rho0_sum$test$beta[start_index_test[i]:(start_index_test[i] + n_vec_test[i] - 1),"MEAN",]
+# Get the betas for each individual
+for(id in 1:8){
+  tmp_beta <- hrs_vcbart_adapt_cs50$test$beta[544*(id-1) + 1:544, ,]
+  dimnames(tmp_beta)[[3]] <- c("int", colnames(X_all))
   
-  beta_L95_train[i,,] <- cs_rho0_sum$train$beta[start_index_train[i]:(start_index_train[i] + n_vec_train[i] - 1),"L95",]
-  beta_L95_test[i,,] <- cs_rho0_sum$test$beta[start_index_test[i]:(start_index_test[i] + n_vec_test[i] - 1),"L95",]
-  
-  beta_U95_train[i,,] <- cs_rho0_sum$train$beta[start_index_train[i]:(start_index_train[i] + n_vec_train[i] - 1),"U95",]
-  beta_U95_test[i,,] <- cs_rho0_sum$test$beta[start_index_test[i]:(start_index_test[i] + n_vec_test[i] - 1),"U95",]
-  
+  assign(paste0("ind",id, "_beta"),
+         tmp_beta)
 }
 
-#######
-# Plot effect of log income at time t = 1 (January 2015) and t = 19 (July 2016)
-beta1_raw <- beta_mean_train[,,"log.income13"]
-group_ind <- as.numeric(unique(philly_cc_fort$id))
+dimnames(ind1_beta)
 
-beta1_t1_t19_t37_raw <- beta1_raw[,c(1,19,37)]
-beta1_t1_t19_t37_rescaled <- beta1_t1_t19_t37_raw
+# Compare individual 1 in blue (white, unmarried) to individual 7 in red (black, married)
 
-beta1_t1_t19_t37_rescaled[beta1_t1_t19_t37_raw <= 0] <- rescale(beta1_t1_t19_t37_raw[beta1_t1_t19_t37_raw <= 0], to = c(-1,0))
-beta1_t1_t19_t37_rescaled[beta1_t1_t19_t37_raw > 0] <- rescale(beta1_t1_t19_t37_raw[beta1_t1_t19_t37_raw > 0], to = c(0,1))
+png("figures/hrs_beta.png", width = 8, height = 2, units = "in", res = 400)
+par(mar = c(4,3,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,4))
 
-tmp_data <- data.frame(id = as.character(group_ind),
-                       beta1_t1 = beta1_t1_t19_t37_rescaled[,1],
-                       beta1_t19 = beta1_t1_t19_t37_rescaled[,2],
-                       beta1_t37 = beta1_t1_t19_t37_rescaled[,3])
-plotData <- inner_join(philly_cc_fort, tmp_data, by = "id")
+# Intercept
+plot(1, type = "n", 
+     xlim = range(age_plot/12), 
+     ylim = range(c(ind1_beta[,c("L95", "U95"), "int"], ind7_beta[,c("L95", "U95"), "int"])),
+     xlab = "", ylab = expression(beta[0]), main = "Intercept")
+mtext(text = "Age\n(a)", side = 1, line = 3, cex = par("cex"))
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind1_beta[,"L95","int"], rev(ind1_beta[,"U95", "int"])),
+        col = rgb(0,0,1,1/5), border = NA)
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind7_beta[,"L95","int"], rev(ind7_beta[,"U95", "int"])),
+        col = rgb(1,0,0,1/5), border = NA)
 
-
-
-beta1_t1_plot <- ggplot() +
-  geom_polygon(data = plotData, aes(x = long, y = lat, group = group, fill = beta1_t1),
-               color = alpha("black", 0.15), alpha = 1, show.legend = FALSE) +
-  scale_fill_distiller(type = "div", palette = "RdBu", limits = c(-1,1)) + 
-  theme(panel.background = element_blank(), axis.ticks = element_blank(), axis.text = element_blank(), 
-        axis.title = element_blank(), plot.title = element_text(hjust = 0.5))
-beta1_t19_plot <- ggplot() +
-  geom_polygon(data = plotData, aes(x = long, y = lat, group = group, fill = beta1_t19),
-               color = alpha("black", 0.15), alpha = 1, show.legend = FALSE) +
-  scale_fill_distiller(type = "div", palette = "RdBu", limits = c(-1,1)) + 
-  theme(panel.background = element_blank(), axis.ticks = element_blank(), axis.text = element_blank(), 
-        axis.title = element_blank(), plot.title = element_text(hjust = 0.5))
-beta1_t37_plot <- ggplot() +
-  geom_polygon(data = plotData, aes(x = long, y = lat, group = group, fill = beta1_t37),
-               color = alpha("black", 0.15), alpha = 1, show.legend = FALSE) +
-  scale_fill_distiller(type = "div", palette = "RdBu", limits = c(-1,1)) + 
-  theme(panel.background = element_blank(), axis.ticks = element_blank(), axis.text = element_blank(), 
-        axis.title = element_blank(), plot.title = element_text(hjust = 0.5))
+lines(age_plot/12, ind1_beta[,"MEAN", "int"], col = rgb(0,0,1,1/3))
+lines(age_plot/12, ind7_beta[,"MEAN", "int"], col = rgb(1,0,0,1/3))
+abline(h = 0, lty = 2)
+axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
+abline(v = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), lty = 2, col = 'gray')
 
 
-tmp_data <- data.frame(id = as.character(group_ind),
-                       beta1_t1 = beta1_t1_rescaled)
-plotData <- inner_join(philly_cc_fort, tmp_data, by = "id")
+# cSEP
+plot(1, type = "n", 
+     xlim = range(age_plot/12), 
+     ylim = range(c(ind1_beta[,c("L95", "U95"), "cSES"], ind7_beta[,c("L95", "U95"), "cSES"])),
+     xlab = "", ylab = expression(beta["cSEP"]), main = "Effect of cSEP")
+mtext(text = "Age\n(b)", side = 1, line = 3, cex = par("cex"))
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind1_beta[,"L95","cSES"], rev(ind1_beta[,"U95", "cSES"])),
+        col = rgb(0,0,1,1/5), border = NA)
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind7_beta[,"L95","cSES"], rev(ind7_beta[,"U95", "cSES"])),
+        col = rgb(1,0,0,1/5), border = NA)
 
-ggsave(plot = beta1_t1_plot, file = "figures/philly_beta1_t1.png", 
-       width = 4, height = 4, units = "in", scale = 3)
-ggsave(plot = beta1_t19_plot, file = "figures/philly_beta1_t19.png", 
-       width = 4, height = 4, units = "in", scale = 3)
-ggsave(plot = beta1_t37_plot, file = "figures/philly_beta1_t37.png", 
-       width = 4, height = 4, units = "in", scale = 3)
+lines(age_plot/12, ind1_beta[,"MEAN", "cSES"], col = rgb(0,0,1,1/3))
+lines(age_plot/12, ind7_beta[,"MEAN", "cSES"], col = rgb(1,0,0,1/3))
+abline(h = 0, lty = 2)
+axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
+abline(v = quantile(Z_all[,1]/12, probs = c(0.025, 0.975)), lty = 2, col = 'gray')
+
+# Education
+plot(1, type = "n", 
+     xlim = range(age_plot/12), 
+     ylim = range(c(ind1_beta[,c("L95", "U95"), "education"], ind7_beta[,c("L95", "U95"), "education"])),
+     xlab = "", ylab = expression(beta["educ"]), main = "Effect of Education")
+mtext(text = "Age\n(c)", side = 1, line = 3, cex = par("cex"))
+
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind1_beta[,"L95","education"], rev(ind1_beta[,"U95", "education"])),
+        col = rgb(0,0,1,1/5), border = NA)
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind7_beta[,"L95","education"], rev(ind7_beta[,"U95", "education"])),
+        col = rgb(1,0,0,1/5), border = NA)
+
+lines(age_plot/12, ind1_beta[,"MEAN", "education"], col = rgb(0,0,1,1/3))
+lines(age_plot/12, ind7_beta[,"MEAN", "education"], col = rgb(1,0,0,1/3))
+abline(h = 0, lty = 2)
+axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
+abline(v = quantile(Z_all[,1]/12, probs = c(0.025, 0.975)), lty = 2, col = 'gray')
 
 
-ggsave("figures/philly_beta1_t1_t19_t37.png", width = 6, height = 2, units = "in", scale = 3,
-       plot = arrangeGrob(grobs = list(beta1_t1_plot, beta1_t19_plot, beta1_t37_plot),nrow = 1, ncol = 3))
+# Diabetes
+plot(1, type = "n", 
+     xlim = range(age_plot/12), 
+     ylim = range(c(ind1_beta[,c("L95", "U95"), "diabetes"], ind7_beta[,c("L95", "U95"), "diabetes"])),
+     xlab = "", ylab = expression(beta["Diabetes"]), main = "Effect of Diabetes")
+mtext(text = "Age\n(d)", side = 1, line = 3, cex = par("cex"))
 
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind1_beta[,"L95","diabetes"], rev(ind1_beta[,"U95", "diabetes"])),
+        col = rgb(0,0,1,1/5), border = NA)
+polygon(c(age_plot/12, rev(age_plot/12)),
+        c(ind7_beta[,"L95","diabetes"], rev(ind7_beta[,"U95", "diabetes"])),
+        col = rgb(1,0,0,1/5), border = NA)
 
-# Make the legend
-col_list <- rev(brewer.pal(n = 5, name = "RdBu"))
-lower_range <- c(min(beta1_t1_t19_t37_raw[beta1_t1_t19_t37_raw <= 0]), 0)
-upper_range <- c(0,max(beta1_t1_t19_t37_raw[beta1_t1_t19_t37_raw > 0]))
-
-lower_lim <- min(beta1_t1_t19_t37_raw)
-upper_lim <- max(beta1_t1_t19_t37_raw)
-
-png("figures/philly_legend.png", width = 4, height = 0.33, units = "in", res = 300)
-par(mar = c(0,0,0,0))
-plot(1, type = "n", xlim = c(-1,1), ylim = c(0, 1), xaxt = "n", yaxt = "n", xlab = "", ylab = "")
-
-legend_seq <- seq(par("usr")[1], par("usr")[2], length = 500)
-for(leg_ix in 1:499){
-  rect(legend_seq[leg_ix], par("usr")[3], legend_seq[leg_ix+1], par("usr")[4],
-       border = NA, col = rgb(colorRamp(col_list, bias = 1)((leg_ix-1)/500)/255))
-}
+lines(age_plot/12, ind1_beta[,"MEAN", "diabetes"], col = rgb(0,0,1,1/3))
+lines(age_plot/12, ind7_beta[,"MEAN", "diabetes"], col = rgb(1,0,0,1/3))
+abline(h = 0, lty = 2)
+axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
+abline(v = quantile(Z_all[,1]/12, probs = c(0.025, 0.975)), lty = 2, col = 'gray')
 
 dev.off()
+
