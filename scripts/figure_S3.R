@@ -10,7 +10,7 @@ boxplot(beta_cov_test[lin_method_names,1,], use.cols = FALSE, horizontal = TRUE,
         main = expression("Intercept"), xlab = "", yaxt = "n",
         pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,1))
 mtext(text = "Coverage\n(a)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 0.5, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.5, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
 text(x = 0.4, y = 2, labels = expression("lm"), cex = 0.95)
 text(x = 0.4, y = 3, labels = expression("KS"), cex = 0.95)
 text(x = 0.4, y = 4, labels = expression("TVCM"), cex = 0.95)
@@ -21,7 +21,7 @@ boxplot(beta_cov_test[lin_method_names,2,], use.cols = FALSE, horizontal = TRUE,
         main = expression("Effect of"~X[1]), xlab = "", yaxt = "n",
         pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,1))
 mtext(text = "Coverage\n(b)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 0.2, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.2, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
 text(x = 0.2, y = 2, labels = expression("lm"), cex = 0.95)
 text(x = 0.5, y = 3, labels = expression("KS"), cex = 0.95)
 text(x = 0.4, y = 4, labels = expression("TVCM"), cex = 0.95)
@@ -32,7 +32,7 @@ boxplot(beta_cov_test[lin_method_names,3,], use.cols = FALSE, horizontal = TRUE,
         main = expression("Effect of"~X[2]), xlab = "", yaxt = "n",
         pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,1))
 mtext(text = "Coverage\n(c)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 0.3, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
 text(x = 0.2, y = 2, labels = expression("lm"), cex = 0.95)
 text(x = 0.6, y = 3, labels = expression("KS"), cex = 0.95)
 text(x = 0.6, y = 4, labels = expression("TVCM"), cex = 0.95)
@@ -43,7 +43,7 @@ boxplot(beta_cov_test[lin_method_names,4,], use.cols = FALSE, horizontal = TRUE,
         main = expression("Effect of"~X[3]), xlab = "", yaxt = "n",
         pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,1))
 mtext(text = "Coverage\n(d)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 0.5, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.5, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
 text(x = 0.5, y = 2, labels = expression("lm"), cex = 0.95)
 text(x = 0.5, y = 3, labels = expression("KS"), cex = 0.95)
 text(x = 0.5, y = 4, labels = expression("TVCM"), cex = 0.95)
@@ -54,7 +54,7 @@ boxplot(beta_cov_test[lin_method_names,5,], use.cols = FALSE, horizontal = TRUE,
         main = expression("Effect of"~X[4]), xlab = "", yaxt = "n",
         pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,1))
 mtext(text = "Coverage\n(e)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 0.3, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
 text(x = 0.5, y = 2, labels = expression("lm"), cex = 0.95)
 text(x = 0.3, y = 3, labels = expression("KS"), cex = 0.95)
 text(x = 0.3, y = 4, labels = expression("TVCM"), cex = 0.95)
@@ -65,7 +65,7 @@ boxplot(beta_cov_test[lin_method_names,6,], use.cols = FALSE, horizontal = TRUE,
         main = expression("Effect of"~X[5]), xlab = "", yaxt = "n",
         pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,1))
 mtext(text = "Coverage\n(f)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 0.4, y = 1, labels = expression("VC-BART"~(rho == 0)), cex = 0.95)
+text(x = 0.4, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
 text(x = 0.3, y = 2, labels = expression("lm"), cex = 0.95)
 text(x = 0.6, y = 3, labels = expression("KS"), cex = 0.95)
 text(x = 0.4, y = 4, labels = expression("TVCM"), cex = 0.95)

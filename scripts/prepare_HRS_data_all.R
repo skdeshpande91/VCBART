@@ -45,7 +45,6 @@ Z_plot[start_index_plot[1]:end_index_plot[1],"race0"] <- 1
 Z_plot[start_index_plot[1]:end_index_plot[1],"race1"] <- 0
 Z_plot[start_index_plot[1]:end_index_plot[1],"married_partnered"] <- 0
 Z_plot[start_index_plot[1]:end_index_plot[1], "food_stamp"] <- 0
-Z_plot[start_index_plot[1]:end_index_plot[1], "food_insecurity"] <- 0
 
 # Individiual 2
 # race0 = 1, race1 = 0, married = 0, food stamp = 1
@@ -74,7 +73,7 @@ Z_plot[start_index_plot[4]:end_index_plot[4], "food_stamp"] <- 1
 
 
 # Individual 5:
-# race0 = 1, race1 = 0, married = 0, food stamp = 0
+# race0 = 0, race1 = 1, married = 0, food stamp = 0
 Z_plot[start_index_plot[5]:end_index_plot[5],"age"] <- cutpoints[[1]]
 Z_plot[start_index_plot[5]:end_index_plot[5],"race0"] <- 0
 Z_plot[start_index_plot[5]:end_index_plot[5],"race1"] <- 1
@@ -83,7 +82,7 @@ Z_plot[start_index_plot[5]:end_index_plot[5], "food_stamp"] <- 0
 Z_plot[start_index_plot[5]:end_index_plot[5], "food_insecurity"] <- 0
 
 # Individiual 6
-# race0 = 1, race1 = 0, married = 0, food stamp = 1
+# race0 = 0, race1 = 1, married = 0, food stamp = 1
 Z_plot[start_index_plot[6]:end_index_plot[6],"age"] <- cutpoints[[1]]
 Z_plot[start_index_plot[6]:end_index_plot[6],"race0"] <- 0
 Z_plot[start_index_plot[6]:end_index_plot[6],"race1"] <- 1
