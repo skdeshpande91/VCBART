@@ -15,6 +15,7 @@
 #include "funs.h"
 #include "mu_posterior.h"
 #include "update_scales.h"
+#include "update_rho.h"
 #include "update_tree.h"
 #include "update_split_probs.h"
 #include "update_alpha_z.h"
@@ -263,6 +264,7 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   arma::cube beta_test_samples(n_obs_test, p, nd); // testing fits
   
   arma::vec sigma_samples(nd+burn);
+  arma::vec rho_samples(nd+burn);
   arma::cube theta_samples(R, p, nd+burn);
   arma::mat alpha_samples(p, nd+burn);
   arma::cube var_counts_samples(R, p, nd+burn);
@@ -319,6 +321,10 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
     if(ht_sigma_y == true) update_sigma_ht_cs(sigma, rho_eps, sigma_pi, di, gen);
     else update_sigma_ig_cs(sigma, rho_eps, sigma_pi, di, gen);
     sigma_samples(iter) = sigma * y_sd;
+    
+    // update rho
+    update_rho_cs(rho_eps, sigma, di, gen);
+    rho_samples(iter) = rho_eps;
     
     if(iter >= burn){
       for(size_t i = 0; i < N_train; i++){
@@ -389,6 +395,7 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   results["beta_train_samples"] = beta_train_samples;
   results["beta_test_samples"] = beta_test_samples;
   results["sigma_samples"] = sigma_samples;
+  results["rho_samples"] = rho_samples;
   results["var_counts_samples"] = var_counts_samples;
   results["time"] = sampler_time;
   return(results);
