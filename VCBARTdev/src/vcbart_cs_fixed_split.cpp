@@ -257,6 +257,10 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   sigma_pi.lambda = chisq_quantile/nu_sigma * sigma_hat;
   sigma_pi.A = sigma_hat; // I think this should be equal to sigma_hat.
   
+  // for rho's adaptive proposal
+  double xi_mean = log(rho_eps/(1-rho_eps));
+  double xi_sd = 0.1;
+
   // containers for output
   arma::mat f_train_samples(n_obs_train, nd); // training fits
   arma::mat f_test_samples(n_obs_test, nd); // testing fits
@@ -323,7 +327,8 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
     sigma_samples(iter) = sigma * y_sd;
     
     // update rho
-    update_rho_cs(rho_eps, sigma, di, gen);
+    // update_rho_cs(rho_eps, sigma, di, gen);
+    update_rho_cs(rho_eps, sigma, xi_sd, xi_mean, iter, di, gen);
     rho_samples(iter) = rho_eps;
     
     if(iter >= burn){
