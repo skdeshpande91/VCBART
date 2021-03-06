@@ -21,30 +21,29 @@
 #include "update_split_probs.h"
 #include "update_alpha_z.h"
 
-// [[Rcpp::export(name = ".vcbart_cs_adapt_split")]]
-Rcpp::List vcbart_cs_adapt_split(arma::vec Y, // n_train x 1 ... concatenation of all observed Y's
-                                 arma::mat X_train, // n_obs x p  ... stack of all observed covariates x for training
-                                 arma::mat Z_train, // n_obs x R ... stack of all observed modifiers z for training
-                                 arma::vec n_vec_train, // number of observations per individual (training)
-                                 arma::vec start_index_vec_train, // start_index_vec_train(i) tells us where individual i's observations start (training)
-                                 arma::mat X_test, // n_test x p ... stack of all covariates x for testing
-                                 arma::mat Z_test, // n_test x R ... stack of all modifiers z for testing
-                                 arma::vec n_vec_test, // number of observations per individual (testing)
-                                 arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
-                                 Rcpp::List xinfo_list, // cutpoints for z
-                                 size_t M, // number of trees
-                                 bool ht_sigma_y, bool ht_tau, // whether to use half-t priors for sigma and tau
-                                 size_t burn, size_t nd, // number of iterations to burn-in and save
-                                 bool verbose, size_t print_every, // print_progress?
-                                 double rho_eps, // autocorrelation parameters for residual errors
-                                 double a, double b, size_t N_u, double rho_alpha, // hyper-parameters for split_probs
-                                 arma::vec tau_vec, // leaf variances
-                                 arma::vec alpha_vec, // alpha for tree prior
-                                 arma::vec beta_vec, // beta for tree prior
-                                 double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM-style prior elicitation
+// [[Rcpp::export(name = ".vcbart_cs_adapt_split_adapt_rho")]]
+Rcpp::List vcbart_cs_adapt_split_adapt_rho(arma::vec Y, // n_train x 1 ... concatenation of all observed Y's
+                                           arma::mat X_train, // n_obs x p  ... stack of all observed covariates x for training
+                                           arma::mat Z_train, // n_obs x R ... stack of all observed modifiers z for training
+                                           arma::vec n_vec_train, // number of observations per individual (training)
+                                           arma::vec start_index_vec_train, // start_index_vec_train(i) tells us where individual i's observations start (training)
+                                           arma::mat X_test, // n_test x p ... stack of all covariates x for testing
+                                           arma::mat Z_test, // n_test x R ... stack of all modifiers z for testing
+                                           arma::vec n_vec_test, // number of observations per individual (testing)
+                                           arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
+                                           Rcpp::List xinfo_list, // cutpoints for z
+                                           size_t M, // number of trees
+                                           bool ht_sigma_y, bool ht_tau, // whether to use half-t priors for sigma and tau
+                                           size_t burn, size_t nd, // number of iterations to burn-in and save
+                                           bool verbose, size_t print_every, // print_progress?
+                                           double rho_eps, // autocorrelation parameters for residual errors
+                                           double a, double b, size_t N_u, double rho_alpha, // hyper-parameters for split_probs
+                                           arma::vec tau_vec, // leaf variances
+                                           arma::vec alpha_vec, // alpha for tree prior
+                                           arma::vec beta_vec, // beta for tree prior
+                                           double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM-style prior elicitation
 
 {
-  if(verbose == true) Rcpp::Rcout << "Entering VCBART with compound symmetry errors and adpative split probabilities" << std::endl;
   Rcpp::RNGScope scope;
   RNG gen;
   
