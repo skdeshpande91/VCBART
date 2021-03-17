@@ -1,5 +1,6 @@
 .DS_Store
 *.tar.gz
+*.Rapp.history
 VCBART/*.Rhistory
 *.Rhistory
 data/*.RData

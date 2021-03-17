@@ -170,7 +170,7 @@ VCBART <- function(Y_train,
                                               a, b, N_u, rho_alpha,
                                               tau_vec, alpha_vec, beta_vec, 
                                               sigma_hat, nu_sigma, nu_tau, variance_prob)
-    } else if(error_strucutre == "cs" & !is.null(rho_eps)){
+    } else if(error_structure == "cs" & !is.null(rho_eps)){
       print("Entering VCBART w/ compound symmetry errors, fixed autocorrelation, and adaptive split probabilities")
       if(abs(rho_eps - 0.5) >= 0.5) stop("rho_eps must be in the open interval (0,1)!")
       fit <- .vcbart_cs_adapt_split_fixed_rho(Y_train, 
