@@ -1,5 +1,8 @@
 //
 //  mu_posterior.cpp
+//  
+//
+//  Created by Sameer Deshpande on 2/3/20.
 //
 
 #include "mu_posterior.h"
@@ -10,6 +13,7 @@ void mu_posterior_cs(arma::vec &post_mean, arma::mat &post_cov_chol, double &ll,
 {
   size_t L = sv.size() ; // number of bottom nodes
   size_t j = 0;
+  size_t jj = 0;
   post_mean.set_size(L); // set appropriate size for the mean
   post_cov_chol.set_size(L,L);
   ll = 0.0;
