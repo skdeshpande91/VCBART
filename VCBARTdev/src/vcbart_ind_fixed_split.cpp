@@ -41,7 +41,6 @@ Rcpp::List vcbart_ind_fixed_split(arma::vec Y, // n_train x 1 ... concatenation 
                                   double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM prior elicitation
 
 {
-  if(verbose == true) Rcpp::Rcout << "Entering VCBART with independent errors & fixed split probabilities" << std::endl;
   Rcpp::RNGScope scope;
   RNG gen;
   
