@@ -401,7 +401,7 @@ Rcpp::List vcbart_ind_adapt_split(arma::vec Y, // n_train x 1 ... concatenation 
   results["beta_train_samples"] = beta_train_samples;
   results["beta_test_samples"] = beta_test_samples;
   results["sigma_samples"] = sigma_samples;
-  //results["theta_samples"] = theta_samples;
+  results["theta_samples"] = theta_samples;
   //results["alpha_samples"] = alpha_samples;
   results["var_counts_samples"] = var_counts_samples;
   results["time"] = sampler_time;

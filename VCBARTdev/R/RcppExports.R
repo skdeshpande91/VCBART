@@ -21,6 +21,10 @@
     .Call('_VCBARTdev_vcbart_ind_adapt_split', PACKAGE = 'VCBARTdev', Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, a, b, N_u, rho_alpha, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob)
 }
 
+.vcbart_ind_adapt_split_fixed_dirichlet <- function(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, init_alpha_z, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob) {
+    .Call('_VCBARTdev_vcbart_ind_adapt_split_fixed_dirichlet', PACKAGE = 'VCBARTdev', Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, init_alpha_z, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob)
+}
+
 .vcbart_ind_fixed_split <- function(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, theta_list, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob) {
     .Call('_VCBARTdev_vcbart_ind_fixed_split', PACKAGE = 'VCBARTdev', Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, theta_list, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob)
 }

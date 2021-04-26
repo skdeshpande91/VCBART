@@ -413,7 +413,7 @@ Rcpp::List vcbart_cs_adapt_split_adapt_rho(arma::vec Y, // n_train x 1 ... conca
   results["beta_test_samples"] = beta_test_samples;
   results["sigma_samples"] = sigma_samples;
   results["rho_samples"] = rho_samples;
-  //results["theta_samples"] = theta_samples;
+  results["theta_samples"] = theta_samples;
   //results["alpha_samples"] = alpha_samples;
   results["var_counts_samples"] = var_counts_samples;
   results["time"] = sampler_time;

@@ -6,12 +6,14 @@ VCBART <- function(Y_train,
                    M = 50,
                    error_structure = c("ind", "cs"),
                    split_probs_type = c("adaptive", "fixed"),
+                   fixed_dirichlet = FALSE,
                    ht_sigma_y = TRUE,
                    ht_tau = TRUE,
                    burn = 500, nd = 1000,
                    verbose = TRUE, print_every = 50,
                    rho_eps = NULL,
                    split_probs = NULL,
+                   init_alpha_z = NULL,
                    a = NULL, 
                    b = NULL,
                    N_u = NULL,
@@ -147,21 +149,37 @@ VCBART <- function(Y_train,
     if(is.null(b)) b <- R
     if(is.null(rho_alpha)) rho_alpha <- R
     if(is.null(N_u)) N_u <- 100
+    if(fixed_dirichlet & is.null(init_alpha_z)){
+      print("Fixed concentration parameter for Dirichlet prior on split probabilities not specified. Defaulting to R")
+      init_alpha_z <- R
+    }
     
     if(error_structure == "ind"){
-      print("Entering VCBART w/ independent errors and adaptive split probabilities")
-      fit <- .vcbart_ind_adapt_split(Y_train, 
-                                     X_train, Z_train, n_train, start_index_train,
-                                     X_test, Z_test, n_test, start_index_test,
-                                     cutpoints, M, ht_sigma_y, ht_tau,
-                                     burn, nd, verbose, print_every,
-                                     a, b, N_u, rho_alpha,
-                                     tau_vec, alpha_vec, beta_vec, 
-                                     sigma_hat, nu_sigma, nu_tau, variance_prob)
+      if(!fixed_dirichlet){
+        print("Entering VCBART w/ independent errors, adaptive split probabilities, and adaptive Dirichlet concentration")
+        fit <- .vcbart_ind_adapt_split(Y_train, 
+                                       X_train, Z_train, n_train, start_index_train,
+                                       X_test, Z_test, n_test, start_index_test,
+                                       cutpoints, M, ht_sigma_y, ht_tau,
+                                       burn, nd, verbose, print_every,
+                                       a, b, N_u, rho_alpha,
+                                       tau_vec, alpha_vec, beta_vec, 
+                                       sigma_hat, nu_sigma, nu_tau, variance_prob)
+      } else{
+        print("Entering VCBART w/ independent errors, adaptive split probabilities, and fixed Dirichlet concentration")
+        fit <- .vcbart_ind_adapt_split_fixed_dirichlet(Y_train, 
+                                                       X_train, Z_train, n_train, start_index_train,
+                                                       X_test, Z_test, n_test, start_index_test,
+                                                       cutpoints, M, ht_sigma_y, ht_tau,
+                                                       burn, nd, verbose, print_every,
+                                                       init_alpha_z,
+                                                       tau_vec, alpha_vec, beta_vec, 
+                                                       sigma_hat, nu_sigma, nu_tau, variance_prob)
+      }
     } else if(error_structure == "cs" & is.null(rho_eps)){
       print("Entering VCBART w/ compound symmetry errors, adaptive autocorrelation, and adaptive split probabilities")
       rho_eps <- 0.5 # initialize rho_eps
-      fit <- .vcbart_cs_adapt_split_fixed_rho(Y_train, 
+      fit <- .vcbart_cs_adapt_split_adapt_rho(Y_train, 
                                               X_train, Z_train, n_train, start_index_train,
                                               X_test, Z_test, n_test, start_index_test,
                                               cutpoints, M, ht_sigma_y, ht_tau,
