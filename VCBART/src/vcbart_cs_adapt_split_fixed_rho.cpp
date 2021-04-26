@@ -1,6 +1,7 @@
 //
-//  vcbart_cs_fixed_split:
-//    Compound symmetry errors (with fixed rho) and fixed split probabilities
+//  vcbart_cs_adapt_split
+//    Compound symmetry errors (with fixed rho) and adaptive split probabilities
+//  Created by Sameer Deshpande on 25 May 2020.
 //
 
 # include <RcppArmadillo.h>
@@ -15,34 +16,34 @@
 #include "funs.h"
 #include "mu_posterior.h"
 #include "update_scales.h"
+#include "update_rho.h"
 #include "update_tree.h"
 #include "update_split_probs.h"
 #include "update_alpha_z.h"
 
-// [[Rcpp::export(name = ".vcbart_cs_fixed_split")]]
-Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation of all observed Y's
-                                 arma::mat X_train, // n_obs x p  ... stack of all observed covariates x for training
-                                 arma::mat Z_train, // n_obs x R ... stack of all observed modifiers z for training
-                                 arma::vec n_vec_train, // number of observations per individual (training)
-                                 arma::vec start_index_vec_train, // start_index_vec_train(i) tells us where individual i's observations start (training)
-                                 arma::mat X_test, // n_test x p ... stack of all covariates x for testing
-                                 arma::mat Z_test, // n_test x R ... stack of all modifiers z for testing
-                                 arma::vec n_vec_test, // number of observations per individual (testing)
-                                 arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
-                                 Rcpp::List xinfo_list, // cutpoints for z
-                                 size_t M, // number of trees
-                                 bool ht_sigma_y, bool ht_tau, // whether to use half-t priors for sigma & tau
-                                 size_t burn, size_t nd, // number of iterations to burn-in and save
-                                 bool verbose, size_t print_every, // print progress?
-                                 double rho_eps,
-                                 Rcpp::List theta_list, // list of split_probs
-                                 arma::vec tau_vec, // leaf variances
-                                 arma::vec alpha_vec, // alpha for tree prior
-                                 arma::vec beta_vec, // beta for tree prior
-                                 double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM prior elicitation
+// [[Rcpp::export(name = ".vcbart_cs_adapt_split_fixed_rho")]]
+Rcpp::List vcbart_cs_adapt_split_fixed_rho(arma::vec Y, // n_train x 1 ... concatenation of all observed Y's
+                                           arma::mat X_train, // n_obs x p  ... stack of all observed covariates x for training
+                                           arma::mat Z_train, // n_obs x R ... stack of all observed modifiers z for training
+                                           arma::vec n_vec_train, // number of observations per individual (training)
+                                           arma::vec start_index_vec_train, // start_index_vec_train(i) tells us where individual i's observations start (training)
+                                           arma::mat X_test, // n_test x p ... stack of all covariates x for testing
+                                           arma::mat Z_test, // n_test x R ... stack of all modifiers z for testing
+                                           arma::vec n_vec_test, // number of observations per individual (testing)
+                                           arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
+                                           Rcpp::List xinfo_list, // cutpoints for z
+                                           size_t M, // number of trees
+                                           bool ht_sigma_y, bool ht_tau, // whether to use half-t priors for sigma and tau
+                                           size_t burn, size_t nd, // number of iterations to burn-in and save
+                                           bool verbose, size_t print_every, // print_progress?
+                                           double rho_eps, // autocorrelation parameters for residual errors
+                                           double a, double b, size_t N_u, double rho_alpha, // hyper-parameters for split_probs
+                                           arma::vec tau_vec, // leaf variances
+                                           arma::vec alpha_vec, // alpha for tree prior
+                                           arma::vec beta_vec, // beta for tree prior
+                                           double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM-style prior elicitation
 
 {
-  if(verbose == true) Rcpp::Rcout << "Entering VCBART with compound symmetry errors and adpative split probabilities" << std::endl;
   Rcpp::RNGScope scope;
   RNG gen;
   
@@ -145,13 +146,15 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   std::vector<std::vector<tree > > t_vec(p, std::vector<tree>(M)); // a vector of vector of trees!
   std::vector<std::vector<double> > theta_vec(p, std::vector<double>(R, 1.0/R)); // vector of split probabilities
   std::vector<std::vector<size_t> > var_counts(p, std::vector<size_t>(R,0)); // var_counts[k][r] counts #times we split on Z_r in beta_k ensemble
- 
-  // Read in the appropriate values of fixed split probabilities.
+  
+  // some prior stuff for alpha
+  std::vector<double> alpha_z(p);
+  double tmp_alpha = 0.0;
+  double u_init = 0.0;
   for(size_t k = 0; k < p; k++){
-    Rcpp::NumericVector tmp = theta_list[k];
-    for(int rr = 0; rr < R; rr++) theta_vec[k][rr] = tmp[rr];
+    u_init = gen.beta(a,b);
+    alpha_z[k] = rho_alpha * u_init/(1.0 - u_init);
   }
- 
 
   double* allfit = new double[n_obs_train]; //
   double* ftemp = new double[n_obs_train]; // holds the temporary fit from single tree on training set
@@ -256,6 +259,10 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   sigma_pi.lambda = chisq_quantile/nu_sigma * sigma_hat;
   sigma_pi.A = sigma_hat; // I think this should be equal to sigma_hat.
   
+  // for rho's adaptive proposal
+  //double xi_mean = log(rho_eps/(1-rho_eps));
+  //double xi_sd = 0.1;
+
   // containers for output
   arma::mat f_train_samples(n_obs_train, nd); // training fits
   arma::mat f_test_samples(n_obs_test, nd); // testing fits
@@ -263,6 +270,7 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   arma::cube beta_test_samples(n_obs_test, p, nd); // testing fits
   
   arma::vec sigma_samples(nd+burn);
+  //arma::vec rho_samples(nd+burn);
   arma::cube theta_samples(R, p, nd+burn);
   arma::mat alpha_samples(p, nd+burn);
   arma::cube var_counts_samples(R, p, nd+burn);
@@ -304,8 +312,18 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
         }
       } // closes loop over trees for beta_k
       
-      // save var_counts
-      for(size_t r = 0; r < R; r++) var_counts_samples(r,k,iter) = var_counts[k][r];
+      // update the split probabilities for beta_k.
+      update_split_probs(theta_vec[k], var_counts[k], alpha_z[k], R, gen);
+      
+      // update the alpha parameter for beta_k:
+      update_alpha_z(tmp_alpha, rho_alpha, theta_vec[k], R, N_u, a, b, gen);
+      alpha_z[k] = tmp_alpha;
+      alpha_samples(k, iter) = alpha_z[k];
+      // save theta_samples and also save var_counts
+      for(size_t r = 0; r < R; r++){
+        theta_samples(r, k, iter) = theta_vec[k][r];
+        var_counts_samples(r,k,iter) = var_counts[k][r];
+      }
     } // closes loop over k
     
     // now that all trees have been updated, update the full residuals
@@ -319,6 +337,11 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
     if(ht_sigma_y == true) update_sigma_ht_cs(sigma, rho_eps, sigma_pi, di, gen);
     else update_sigma_ig_cs(sigma, rho_eps, sigma_pi, di, gen);
     sigma_samples(iter) = sigma * y_sd;
+    
+    // update rho
+    // update_rho_cs(rho_eps, sigma, di, gen);
+    //update_rho_cs(rho_eps, sigma, xi_sd, xi_mean, iter, di, gen);
+    //rho_samples(iter) = rho_eps;
     
     if(iter >= burn){
       for(size_t i = 0; i < N_train; i++){
@@ -389,6 +412,9 @@ Rcpp::List vcbart_cs_fixed_split(arma::vec Y, // n_train x 1 ... concatenation o
   results["beta_train_samples"] = beta_train_samples;
   results["beta_test_samples"] = beta_test_samples;
   results["sigma_samples"] = sigma_samples;
+  //results["rho_samples"] = rho_samples;
+  results["theta_samples"] = theta_samples;
+  //results["alpha_samples"] = alpha_samples;
   results["var_counts_samples"] = var_counts_samples;
   results["time"] = sampler_time;
   return(results);

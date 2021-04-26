@@ -143,7 +143,7 @@ chain2 <- VCBART(Y_train, X_train, Z_train, n_train,
 
 beta_summary <- summarize_beta(chain1, chain2, burn = 500)
 ystar_summary <- summarize_posterior_predictive(chain1, chain2, burn = 500)
-beta_support <- get_beta_support(chain1, chain2, burn = burn, max_cutoff = 10)
+beta_support <- get_beta_support(chain1, chain2, burn = 500, max_cutoff = 1)
 
 # Plot the actual out-of-sample observations against the posterior predictive means
 plot(Y_test, ystar_summary$test[,"MEAN"])
@@ -152,7 +152,7 @@ plot(Y_test, ystar_summary$test[,"MEAN"])
 plot(beta1_test, beta_summary$test[,"MEAN",2])
 
 # Check the median probability models for cut-off of 1
-# We select Z_1 and Z_2 for beta0, Z_1 for beta_1, Z_1, for beta_2, and Z_1 & Z_2 for beta_3
+# We correctly select Z_1 and Z_2 for beta0, Z_1 for beta_1, Z_1, for beta_2
 
 beta_support$support[[1]]
 ```
