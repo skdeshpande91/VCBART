@@ -1,13 +1,13 @@
-# VC-BART: Bayesian trees for varying coefficients
+# VCBART: Bayesian trees for varying coefficients
 
 An R package for fitting a linear varying coefficient model using Bayesian Additive Regression Trees.
 
 
-For more details about the VC-BART procedure, see [our paper](https://arxiv.org/abs/2003.06416).
+For more details about the VCBART procedure, see [our paper](https://arxiv.org/abs/2003.06416).
 
 
 This is the development branch.
-If you just want to use VC-BART, you should download the package source that is available on the main branch.
+If you just want to use VCBART, you should download the package source that is available on the main branch.
 A copy of that package source is maintained in the directory VCBART.
 
 The directory VCBARTdev is a prototype package in which updates and other development occurs.
