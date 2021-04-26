@@ -19,26 +19,26 @@
 #include "update_split_probs.h"
 #include "update_alpha_z.h"
 
-// [[Rcpp::export(name = ".vcbart_ind_adapt_split")]]
-Rcpp::List vcbart_ind_adapt_split(arma::vec Y, // n_train x 1 ... concatenation of all observed Y's
-                                  arma::mat X_train, // n_obs x p  ... stack of all observed covariates x for training
-                                  arma::mat Z_train, // n_obs x R ... stack of all observed modifiers z for training
-                                  arma::vec n_vec_train, // number of observations per individual (training)
-                                  arma::vec start_index_vec_train, // start_index_vec_train(i) tells us where individual i's observations start (training)
-                                  arma::mat X_test, // n_test x p ... stack of all covariates x for testing
-                                  arma::mat Z_test, // n_test x R ... stack of all modifiers z for testing
-                                  arma::vec n_vec_test, // number of observations per individual (testing)
-                                  arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
-                                  Rcpp::List xinfo_list, // cutpoints for z
-                                  size_t M, // number of trees
-                                  bool ht_sigma_y, bool ht_tau, // whether to use half-t priors for sigma & tau
-                                  size_t burn, size_t nd, // number of iterations to burn-in and save
-                                  bool verbose, size_t print_every, // print progress?
-                                  double a, double b, size_t N_u, double rho_alpha, // hyper-parameters for split_probs
-                                  arma::vec tau_vec, // leaf variances
-                                  arma::vec alpha_vec, // alpha for tree prior
-                                  arma::vec beta_vec, // beta for tree prior
-                                  double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM prior elicitation
+// [[Rcpp::export(name = ".vcbart_ind_adapt_split_fixed_dirichlet")]]
+Rcpp::List vcbart_ind_adapt_split_fixed_dirichlet(arma::vec Y, // n_train x 1 ... concatenation of all observed Y's
+                                                  arma::mat X_train, // n_obs x p  ... stack of all observed covariates x for training
+                                                  arma::mat Z_train, // n_obs x R ... stack of all observed modifiers z for training
+                                                  arma::vec n_vec_train, // number of observations per individual (training)
+                                                  arma::vec start_index_vec_train, // start_index_vec_train(i) tells us where individual i's observations start (training)
+                                                  arma::mat X_test, // n_test x p ... stack of all covariates x for testing
+                                                  arma::mat Z_test, // n_test x R ... stack of all modifiers z for testing
+                                                  arma::vec n_vec_test, // number of observations per individual (testing)
+                                                  arma::vec start_index_vec_test, // start_index_vec_test(i) tells us where individual i's observation start (testing)
+                                                  Rcpp::List xinfo_list, // cutpoints for z
+                                                  size_t M, // number of trees
+                                                  bool ht_sigma_y, bool ht_tau, // whether to use half-t priors for sigma & tau
+                                                  size_t burn, size_t nd, // number of iterations to burn-in and save
+                                                  bool verbose, size_t print_every, // print progress?
+                                                  double init_alpha_z, // split probs ~ Dirichlet(init_alpha_z/R, ..., init_alpha_z/R)
+                                                  arma::vec tau_vec, // leaf variances
+                                                  arma::vec alpha_vec, // alpha for tree prior
+                                                  arma::vec beta_vec, // beta for tree prior
+                                                  double sigma_hat, double nu_sigma, double nu_tau, double variance_prob) // arguments for CGM prior elicitation
 
 {
   Rcpp::RNGScope scope;
@@ -144,15 +144,11 @@ Rcpp::List vcbart_ind_adapt_split(arma::vec Y, // n_train x 1 ... concatenation 
   std::vector<std::vector<double> > theta_vec(p, std::vector<double>(R, 1.0/R));
   std::vector<std::vector<size_t> > var_counts(p, std::vector<size_t>(R,0)); // var_counts[k][r] counts #times we split on Z_r in beta_k ensemble
   
-  // some prior stuff for alpha
-  std::vector<double> alpha_z(p);
-  double tmp_alpha = 0.0;
-  double u_init = 0.0;
-  for(size_t k = 0; k < p; k++){
-    u_init = gen.beta(a,b);
-    alpha_z[k] = rho_alpha * u_init/(1.0 - u_init);
-  }
-
+  
+  // For DART we had theta_j ~ Dirichlet(alpha_z[j]/R, ..., alpha_z[j]/R)
+  // we're not updating alpha_z in this function
+  std::vector<double> alpha_z(p, init_alpha_z);
+  
   double* allfit = new double[n_obs_train]; //
   double* ftemp = new double[n_obs_train]; // holds the temporary fit from single tree on training set
   double* ftemp_pred = new double[n_obs_test]; // holds temporary fit from single tree on testing set
@@ -306,10 +302,6 @@ Rcpp::List vcbart_ind_adapt_split(arma::vec Y, // n_train x 1 ... concatenation 
       // update the split probabilities for beta_k.
       update_split_probs(theta_vec[k], var_counts[k], alpha_z[k], R, gen);
       
-      // update the alpha parameter for beta_k:
-      update_alpha_z(tmp_alpha, rho_alpha, theta_vec[k], R, N_u, a, b, gen);
-      alpha_z[k] = tmp_alpha;
-      alpha_samples(k, iter) = alpha_z[k];
       // save theta_samples and also save var_counts
       for(size_t r = 0; r < R; r++){
         theta_samples(r, k, iter) = theta_vec[k][r];
@@ -402,7 +394,6 @@ Rcpp::List vcbart_ind_adapt_split(arma::vec Y, // n_train x 1 ... concatenation 
   results["beta_test_samples"] = beta_test_samples;
   results["sigma_samples"] = sigma_samples;
   results["theta_samples"] = theta_samples;
-  //results["alpha_samples"] = alpha_samples;
   results["var_counts_samples"] = var_counts_samples;
   results["time"] = sampler_time;
   return(results);
