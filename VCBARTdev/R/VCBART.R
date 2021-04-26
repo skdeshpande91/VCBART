@@ -83,6 +83,9 @@ VCBART <- function(Y_train,
   } else{
     beta_vec <- rep(0.95, times = p)
   }
+  
+  ## Per issue #4 check that cutpoints has length R
+  if(length(cutpoints) != R) stop("cutpoints must have length = ncol(Z_train)")
 
   # eventually handle these arguments in a better way
   sigma_hat <- 1
@@ -112,7 +115,7 @@ VCBART <- function(Y_train,
       }
     }
     
-    # If we have reached here without stopping, we will be ready to run VC-BART with fixed splitting probabilities
+    # If we have reached here without stopping, we will be ready to run VCBART with fixed splitting probabilities
     if(error_structure == "ind"){
       print("Entering VCBART w/ independent errors & fixed split probabilities")
       fit <- .vcbart_ind_fixed_split(Y_train, 
