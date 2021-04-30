@@ -1,69 +1,139 @@
-# Produces Figure S4 of the supplementary materials
-load("results/sim_p5R20/results_p5R20.RData")
+###### 
+# Code to produce Figure S4 in the Supplementary Materials
+######
 
-lin_method_names <- c("vcbart_adapt", "lm", "kernel_smoothing", "tvc", "boosted_tvcm")
-method_names <- c("vcbart_adapt", "lm", "kernel_smoothing", "tvc", "boosted_tvcm", "bart", "extraTrees", "gbm")
+load("results/results_p5R20_sigma1.RData")
+load("results/results_p5R20_sigma2.RData")
+load("results/results_p5R20_sigma3.RData")
+load("results/results_p5R20_sigma4.RData")
 
-png("figures/beta_int_p5R20.png", width = 8, height = 8*2/3, units = "in", res = 400)
-par(mar = c(4.2,1,2,1), mgp  = c(1.8, 0.5, 0), mfrow = c(2,3), cex.main = 1.5, cex.axis = 1.1, cex.lab = 1.1)
-boxplot(beta_int_test[lin_method_names,1,], use.cols = FALSE, horizontal = TRUE,
-        main = expression("Intercept"), xlab = "", yaxt = "n",
-        pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0, 7))
-mtext(text = "Relative lenght\n(a)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
-text(x = 3, y = 2, labels = expression("lm"), cex = 0.95)
-text(x = 0.5, y = 3, labels = expression("KS"), cex = 0.95)
-text(x = 0.5, y = 4, labels = expression("TVCM"), cex = 0.95)
-text(x = 4, y = 5, labels = expression("BTVCM"), cex = 0.95)
+tmp_beta_mse1 <- apply(beta_mse_test_sigma1, MARGIN = c(1,3), FUN = mean, na.rm = TRUE)
+tmp_beta_mse2 <- apply(beta_mse_test_sigma2, MARGIN = c(1,3), FUN = mean, na.rm = TRUE)
+tmp_beta_mse3 <- apply(beta_mse_test_sigma3, MARGIN = c(1,3), FUN = mean, na.rm = TRUE)
+tmp_beta_mse4 <- apply(beta_mse_test_sigma4, MARGIN = c(1,3), FUN = mean, na.rm = TRUE)
 
-boxplot(beta_int_test[lin_method_names,2,], use.cols = FALSE, horizontal = TRUE,
-        main = expression("Effect of"~X[1]), xlab = "", yaxt = "n",
-        pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,8))
-mtext(text = "Relative length\n(b)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
-text(x = 3, y = 2, labels = expression("lm"), cex = 0.95)
-text(x = 0.5, y = 3, labels = expression("KS"), cex = 0.95)
-text(x = 4, y = 4, labels = expression("TVCM"), cex = 0.95)
-text(x = 3, y = 5, labels = expression("BTVCM"), cex = 0.95)
+beta_mse_mean <- matrix(nrow = 4, ncol = dim(beta_mse_test_sigma1)[1], dimnames = list(c(), dimnames(beta_mse_test_sigma1)[[1]]))
+beta_mse_mean[1,] <- apply(tmp_beta_mse1, MARGIN = 1, FUN = mean, na.rm = TRUE)
+beta_mse_mean[2,] <- apply(tmp_beta_mse2, MARGIN = 1, FUN = mean, na.rm = TRUE)
+beta_mse_mean[3,] <- apply(tmp_beta_mse3, MARGIN = 1, FUN = mean, na.rm = TRUE)
+beta_mse_mean[4,] <- apply(tmp_beta_mse4, MARGIN = 1, FUN = mean, na.rm = TRUE)
 
-boxplot(beta_int_test[lin_method_names,3,], use.cols = FALSE, horizontal = TRUE,
-        main = expression("Effect of"~X[2]), xlab = "", yaxt = "n",
-        pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,8))
-mtext(text = "Relative length\n(c)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x =3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
-text(x = 3, y = 2, labels = expression("lm"), cex = 0.95)
-text(x = 1, y = 3, labels = expression("KS"), cex = 0.95)
-text(x = 0.6, y = 4, labels = expression("TVCM"), cex = 0.95)
-text(x = 3, y = 5, labels = expression("BTVCM"), cex = 0.95)
+beta_mse_sd <- matrix(nrow = 4, ncol = dim(beta_mse_test_sigma1)[1], dimnames = list(c(), dimnames(beta_mse_test_sigma1)[[1]]))
+beta_mse_sd[1,] <- apply(tmp_beta_mse1, MARGIN = 1, FUN = sd, na.rm = TRUE)
+beta_mse_sd[2,] <- apply(tmp_beta_mse2, MARGIN = 1, FUN = sd, na.rm = TRUE)
+beta_mse_sd[3,] <- apply(tmp_beta_mse3, MARGIN = 1, FUN = sd, na.rm = TRUE)
+beta_mse_sd[4,] <- apply(tmp_beta_mse4, MARGIN = 1, FUN = sd, na.rm = TRUE)
 
-boxplot(beta_int_test[lin_method_names,4,], use.cols = FALSE, horizontal = TRUE,
-        main = expression("Effect of"~X[3]), xlab = "", yaxt = "n",
-        pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,12))
-mtext(text = "Relative length\n(d)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 4, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
-text(x = 4, y = 2, labels = expression("lm"), cex = 0.95)
-text(x = 1, y = 3, labels = expression("KS"), cex = 0.95)
-text(x = 7, y = 4, labels = expression("TVCM"), cex = 0.95)
-text(x = 4, y = 5, labels = expression("BTVCM"), cex = 0.95)
 
-boxplot(beta_int_test[lin_method_names,5,], use.cols = FALSE, horizontal = TRUE,
-        main = expression("Effect of"~X[4]), xlab = "", yaxt = "n",
-        pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,6))
-mtext(text = "Relative length\n(e)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
-text(x = 2, y = 2, labels = expression("lm"), cex = 0.95)
-text(x = 0.3, y = 3, labels = expression("KS"), cex = 0.95)
-text(x = 1, y = 4, labels = expression("TVCM"), cex = 0.95)
-text(x = 2, y = 5, labels = expression("BTVCM"), cex = 0.95)
 
-boxplot(beta_int_test[lin_method_names,6,], use.cols = FALSE, horizontal = TRUE,
-        main = expression("Effect of"~X[5]), xlab = "", yaxt = "n",
-        pch = 16, cex = 0.5, medlwd = 0.5, at = 1:5, ylim = c(0,10))
-mtext(text = "Relative length\n(f)", side = 1, line = 3, cex = 1.25 * par('cex'))
-text(x = 3, y = 1, labels = expression("VCBART"~(rho == 0)), cex = 0.95)
-text(x = 3, y = 2, labels = expression("lm"), cex = 0.95)
-text(x = 0.6, y = 3, labels = expression("KS"), cex = 0.95)
-text(x = 7, y = 4, labels = expression("TVCM"), cex = 0.95)
-text(x = 3, y = 5, labels = expression("BTVCM"), cex = 0.95)
 
+sigma_list <- c(0.5,1, 2, 4)
+
+pch_list <- c(16, 17, 18, 15, 8)
+col_list <- c("black", "green", "red", "blue", "orange")
+method_list <- c("vcbart_adapt", "boosted_tvcm", "tvc", "lm", "kernel_smoothing")
+
+png("figures/beta_mse_sigma.png", width = 4.5, height = 4.5, units = "in", res = 300)
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", xlim = log(c(0.4, 4.1)), ylim = c(0, 20), xlab = expression(sigma), ylab = "MSE", xaxt = "n",
+     main = "Covariate effect recovery")
+axis(side = 1, at = log(sigma_list), labels = sigma_list)
+
+for(i in 1:5){
+  lines(log(sigma_list), beta_mse_mean[,method_list[i]], col = col_list[i])
+  
+  for(j in 1:4){
+    lines(x = log(c(sigma_list[j], sigma_list[j])), y = beta_mse_mean[j, method_list[i]] + beta_mse_sd[j, method_list[i]] * c(-1,1), lty = 2, col = col_list[i])
+  }
+  points(log(sigma_list), beta_mse_mean[,method_list[i]], col = col_list[i], pch = 16, cex = 1)
+  
+  
+}
+#legend("topleft", legend = c("VCBART", "BTVCM", "TVCM", "lm", "KS"), pch = pch_list, col = col_list)
+legend("topleft", legend = c("VCBART", "BTVCM", "TVCM", "lm", "KS"), pch = 16, col = col_list)
+
+dev.off()
+
+
+ystar_smse_mean <- matrix(nrow = 4, ncol = dim(ystar_smse_test_sigma1)[1], dimnames = list(c(), dimnames(ystar_smse_test_sigma1)[[1]]))
+ystar_smse_mean[1,] <- apply(ystar_smse_test_sigma1, MARGIN = 1, FUN = mean, na.rm = TRUE)
+ystar_smse_mean[2,] <- apply(ystar_smse_test_sigma2, MARGIN = 1, FUN = mean, na.rm = TRUE)
+ystar_smse_mean[3,] <- apply(ystar_smse_test_sigma3, MARGIN = 1, FUN = mean, na.rm = TRUE)
+ystar_smse_mean[4,] <- apply(ystar_smse_test_sigma4, MARGIN = 1, FUN = mean, na.rm = TRUE)
+
+ystar_smse_sd <- ystar_smse_mean
+ystar_smse_sd[1,] <- apply(ystar_smse_test_sigma1, MARGIN = 1, FUN = sd, na.rm = TRUE)
+ystar_smse_sd[2,] <- apply(ystar_smse_test_sigma2, MARGIN = 1, FUN = sd, na.rm = TRUE)
+ystar_smse_sd[3,] <- apply(ystar_smse_test_sigma3, MARGIN = 1, FUN = sd, na.rm = TRUE)
+ystar_smse_sd[4,] <- apply(ystar_smse_test_sigma4, MARGIN = 1, FUN = sd, na.rm = TRUE)
+
+
+pch_list2 <- c(16, 17, 18, 15, 8, 3, 4, 10)
+method_list2 <- c("vcbart_adapt", "boosted_tvcm", "tvc", "lm", "kernel_smoothing", "bart", "extraTrees", "gbm")
+col_list2 <- c("black", "green", "red", "blue", "orange", "cyan", "purple", "pink")
+png("figures/ystar_smse_sigma.png", width = 4.5, height = 4.5, units = "in", res = 300)
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", xlim = log(c(0.4, 4.1)), ylim = c(0, 0.5), xlab = expression(sigma), ylab = "SMSE", xaxt = "n",
+     main = "Predictive performance")
+axis(side = 1, at = log(sigma_list), labels = sigma_list)
+
+for(i in 1:8){
+  lines(log(sigma_list), ystar_smse_mean[,method_list2[i]], col = col_list2[i])
+  
+  for(j in 1:4){
+    lines(x = log(c(sigma_list[j], sigma_list[j])), y = ystar_smse_mean[j, method_list2[i]] + ystar_smse_sd[j, method_list2[i]] * c(-1,1), lty = 2, col = col_list2[i])
+  }
+  #points(log(sigma_list), ystar_smse_mean[,method_list2[i]], pch = pch_list2[i], cex = 0.8, col = col_list2[i])
+  points(log(sigma_list), ystar_smse_mean[,method_list2[i]], pch = 16, cex = 0.8, col = col_list2[i])
+  
+  
+}
+legend("topleft", legend = c("VCBART", "BTVCM", "TVCM", "lm"), pch = 16, col = col_list2[1:4])
+legend("topright", legend = c("KS", "BART", "ERT", "GBM"), pch = 16, col = col_list2[5:8])
+dev.off()
+
+
+png("~/Documents/Research/vc_bart/figures/sim_p5R20_sigma.png", width = 8, height = 4, units = "in", res = 300)
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,2))
+
+pch_list <- c(16, 17, 18, 15, 8)
+col_list <- c("black", "green", "red", "blue", "orange")
+method_list <- c("vcbart_adapt", "boosted_tvcm", "tvc", "lm", "kernel_smoothing")
+
+plot(1, type = "n", xlim = log(c(0.4, 4.1)), ylim = c(0, 20), xlab = expression(sigma), ylab = "MSE", xaxt = "n",
+     main = "Covariate effect recovery")
+axis(side = 1, at = log(sigma_list), labels = sigma_list)
+
+for(i in 1:5){
+  lines(log(sigma_list), beta_mse_mean[,method_list[i]], col = col_list[i])
+  
+  #for(j in 1:4){
+  #  lines(x = log(c(sigma_list[j], sigma_list[j])), y = beta_mse_mean[j, method_list[i]] + beta_mse_sd[j, method_list[i]] * c(-1,1), lty = 2, col = col_list[i])
+  #}
+  points(log(sigma_list), beta_mse_mean[,method_list[i]], col = col_list[i], pch = 16, cex = 1)
+  
+  
+}
+legend("topleft", legend = c("VCBART", "BTVCM", "TVCM", "lm", "KS"), pch = 16, col = col_list)
+
+pch_list2 <- c(16, 17, 18, 15, 8, 3, 4, 10)
+method_list2 <- c("vcbart_adapt", "boosted_tvcm", "tvc", "lm", "kernel_smoothing", "bart", "extraTrees", "gbm")
+col_list2 <- c("black", "green", "red", "blue", "orange", "cyan", "purple", "pink")
+plot(1, type = "n", xlim = log(c(0.4, 4.1)), ylim = c(0, 0.5), xlab = expression(sigma), ylab = "SMSE", xaxt = "n",
+     main = "Predictive performance")
+axis(side = 1, at = log(sigma_list), labels = sigma_list)
+
+for(i in 1:8){
+  lines(log(sigma_list), ystar_smse_mean[,method_list2[i]], col = col_list2[i])
+  
+  #for(j in 1:4){
+  #  lines(x = log(c(sigma_list[j], sigma_list[j])), y = ystar_smse_mean[j, method_list2[i]] + ystar_smse_sd[j, method_list2[i]] * c(-1,1), lty = 2, col = col_list2[i])
+  #}
+  #points(log(sigma_list), ystar_smse_mean[,method_list2[i]], pch = pch_list2[i], cex = 0.8, col = col_list2[i])
+  points(log(sigma_list), ystar_smse_mean[,method_list2[i]], pch = 16, cex = 0.8, col = col_list2[i])
+  
+  
+}
+legend("topleft", legend = c("VCBART", "BTVCM", "TVCM", "lm"), pch = 16, col = col_list2[1:4])
+legend("topright", legend = c("KS", "BART", "ERT", "GBM"), pch = 16, col = col_list2[5:8])
 dev.off()

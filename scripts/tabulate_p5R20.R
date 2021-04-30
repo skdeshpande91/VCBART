@@ -1,4 +1,8 @@
-# Tabulate results
+# Tabulate results from main simulation study
+# If tabulate all simulation results for a fixed sigma, set snr_ix manually
+
+args <- commandArgs(TRUE)
+snr_ix <- as.numeric(args[1])
 
 p <- 5
 R <- 20
@@ -38,11 +42,12 @@ timing <- matrix(nrow = length(methods), ncol = N_sim,
 
 for(sim_number in 1:N_sim){
   
-  data_filename <- paste0("data/sim_p5R20/data_p5R20_", sim_number, ".RData")
+  data_filename <- paste0("data/sim_p5R20/data_p5R20_", sim_number, "_sigma", snr_ix, ".RData")
   if(file.exists(data_filename)){
     load(data_filename)
-    load(paste0("results/sim_p5R20/vcbart_adapt/vcbart_adapt_", sim_number, ".RData"))
-    vcbart_adapt <- get(paste0("vcbart_adapt_", sim_number))
+    
+    load(paste0("results/sim_p5R20/vcbart_adapt/vcbart_adapt_", sim_number, "_sigma", snr_ix, ".RData"))
+    vcbart_adapt <- get(paste0("vcbart_adapt_", sim_number, "_sigma", snr_ix))
     
     adapt_beta_int_train <- vcbart_adapt[["train"]][["beta"]][,"U95",] - vcbart_adapt[["train"]][["beta"]][,"L95",]
     adapt_beta_int_test <- vcbart_adapt[["test"]][["beta"]][,"U95",] - vcbart_adapt[["test"]][["beta"]][,"L95",]
@@ -54,12 +59,12 @@ for(sim_number in 1:N_sim){
     for(m in methods){
       
       
-      file_name <- paste0("results/sim_p5R20/", m, "/", m, "_", sim_number, ".RData")
+      file_name <- paste0("results/sim_p5R20/", m, "/", m, "_", sim_number,"_sigma", snr_ix, ".RData")
       
       if(file.exists(file_name)){
         load(file_name)
-        tmp_fit <- get(paste0(m, "_", sim_number))
-        rm(list = paste0(m, "_", sim_number))
+        tmp_fit <- get(paste0(m, "_", sim_number, "_sigma", snr_ix))
+        rm(list = paste0(m, "_", sim_number, "_sigma", snr_ix))
         if(m %in% lin_methods){
           
           beta_mse_train[m,,sim_number] <- colMeans( (beta_train - tmp_fit[["train"]][["beta"]][,"MEAN",])^2, na.rm = TRUE)
@@ -121,6 +126,32 @@ for(sim_number in 1:N_sim){
   }
 }
 
-save(beta_mse_train, beta_mse_test, beta_cov_train, beta_cov_test, beta_int_train, beta_int_test,
-     ystar_rmse_train, ystar_rmse_test, ystar_smse_train, ystar_smse_test, 
-     ystar_cov_train, ystar_cov_test, ystar_int_train, ystar_int_test, file = paste0("results/sim_p5R20/results_p5R20.RData"))
+assign(paste0("beta_mse_train_sigma", snr_ix), beta_mse_train)
+assign(paste0("beta_mse_test_sigma", snr_ix), beta_mse_test)
+
+assign(paste0("beta_cov_train_sigma", snr_ix), beta_cov_train)
+assign(paste0("beta_cov_test_sigma", snr_ix), beta_cov_test)
+
+assign(paste0("beta_int_train_sigma", snr_ix), beta_int_train)
+assign(paste0("beta_int_test_sigma", snr_ix), beta_int_test)
+
+assign(paste0("ystar_rmse_train_sigma", snr_ix), ystar_rmse_train)
+assign(paste0("ystar_rmse_test_sigma", snr_ix), ystar_rmse_test)
+
+assign(paste0("ystar_smse_train_sigma", snr_ix), ystar_smse_train)
+assign(paste0("ystar_smse_test_sigma", snr_ix), ystar_smse_test)
+
+assign(paste0("ystar_cov_train_sigma", snr_ix), ystar_cov_train)
+assign(paste0("ystar_cov_test_sigma", snr_ix), ystar_cov_test)
+
+assign(paste0("ystar_int_train_sigma", snr_ix), ystar_int_train)
+assign(paste0("ystar_int_test_sigma", snr_ix), ystar_int_test)
+
+assign(paste0("timing_sigma", snr_ix), timing)
+
+
+save_list <- paste0(c("beta_mse_train", "beta_mse_test", "beta_cov_train", "beta_cov_test",
+                      "beta_int_train", "beta_int_test", "ystar_rmse_train", "ystar_rmse_test",
+                      "ystar_smse_train", "ystar_smse_test", "ystar_cov_train", "ystar_cov_test",
+                      "ystar_int_train", "ystar_int_test"), "_sigma", snr_ix)
+save(list = save_list, file = paste0("results/sim_p5R20/results_p5R20_sigma", snr_ix, ".RData"))

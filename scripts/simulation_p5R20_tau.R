@@ -5,7 +5,7 @@ sim_number <- as.numeric(args[1])
 load("data/p5R20_data.RData")
 rm(X_all, Y_all, Z_all, start_index_all, end_index_all, n_all, N_all)
 # We can go ahead and re-load the data used in the simulation from the main text
-load(paste0("data/sim_p5R20/data_p5R20_", sim_number, ".RData"))
+load(paste0("data/sim_p5R20/data_p5R20_", sim_number, "_sigma1.RData"))
 
 tau_seq <- c(1, 1/4, 1/2, 2/3, 3/2,2, 4)
 tau_names <- paste0("tau_", c("1_1", "1_4", "1_2", "2_3", "3_2", "2_1", "4_1"))
