@@ -2,13 +2,23 @@
 # Effects of individual covariates for HRS data
 load("data/HRS/HRS_all.RData")
 load("results/vcbart_hrs_all.RData")
+# print supports
+
+
+
+for(j in 1:(1 + ncol(X_all))){
+  if(j == 1) print("support for intercept")
+  else print(paste("support for", colnames(X_all)[j-1]))
+  print(colnames(Z_all)[hrs_vcbart_adapt_rho$beta_support[["support"]][[1]][[j]]])
+}
+
 
 # vector of distinct ages for hypothetical individuals
 age_plot <- Z_plot[1:544,"age"]
 
 # Get the betas for each individual
 for(id in 1:8){
-  tmp_beta <- hrs_vcbart_adapt_cs50$test$beta[544*(id-1) + 1:544, ,]
+  tmp_beta <- hrs_vcbart_adapt_rho$test$beta[544*(id-1) + 1:544, ,]
   dimnames(tmp_beta)[[3]] <- c("int", colnames(X_all))
   
   assign(paste0("ind",id, "_beta"),
@@ -19,7 +29,7 @@ dimnames(ind1_beta)
 
 # Compare individual 1 in blue (white, unmarried) to individual 7 in red (black, married)
 
-png("figures/hrs_beta.png", width = 8, height = 2, units = "in", res = 400)
+png("figures/hrs_beta.png", width = 8, height = 2.2, units = "in", res = 400)
 par(mar = c(4,3,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,4))
 
 # Intercept
@@ -59,7 +69,7 @@ lines(age_plot/12, ind1_beta[,"MEAN", "cSES"], col = rgb(0,0,1,1/3))
 lines(age_plot/12, ind7_beta[,"MEAN", "cSES"], col = rgb(1,0,0,1/3))
 abline(h = 0, lty = 2)
 axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
-abline(v = quantile(Z_all[,1]/12, probs = c(0.025, 0.975)), lty = 2, col = 'gray')
+abline(v = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), lty = 2, col = 'gray')
 
 # Education
 plot(1, type = "n", 
@@ -79,7 +89,7 @@ lines(age_plot/12, ind1_beta[,"MEAN", "education"], col = rgb(0,0,1,1/3))
 lines(age_plot/12, ind7_beta[,"MEAN", "education"], col = rgb(1,0,0,1/3))
 abline(h = 0, lty = 2)
 axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
-abline(v = quantile(Z_all[,1]/12, probs = c(0.025, 0.975)), lty = 2, col = 'gray')
+abline(v = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), lty = 2, col = 'gray')
 
 
 # Diabetes
@@ -100,7 +110,7 @@ lines(age_plot/12, ind1_beta[,"MEAN", "diabetes"], col = rgb(0,0,1,1/3))
 lines(age_plot/12, ind7_beta[,"MEAN", "diabetes"], col = rgb(1,0,0,1/3))
 abline(h = 0, lty = 2)
 axis(side = 1, at = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), labels = NA)
-abline(v = quantile(Z_all[,1]/12, probs = c(0.025, 0.975)), lty = 2, col = 'gray')
+abline(v = quantile(Z_all[,1]/12, probs = c(0.05, 0.95)), lty = 2, col = 'gray')
 
 dev.off()
 
