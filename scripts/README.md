@@ -14,16 +14,22 @@ Assuming you are working in the main directory (i.e. `..` relative to this folde
 
 The main script to carry out the simulation study is `simulation_p5R20.R`.
 It was written to be run as a batch job, where the fold number is provided as a command line argument.
-For instance, to run the 10th fold and dump all of the printed output to a file, you could run the following from the command line
+The script also accepts a second argument, which indicates which value of sigma to use when generating the data.
+We ran our simulation with sigma = 0.5, 1, 2, and 4.
+So to run the 10th fold with sigma = 2 and to dump all of the printed output to a file, you could run the following from the command line.
 ```
-R --no-save --args 10 < scripts/simulation_p5R20.R > output.txt
+R --no-save --args 10 3 < scripts/simulation_p5R20.R > output.txt
 ```
+Note that the script saves the training and testing data in the directory `data/sim_p5R20/` so you should make sure that the directory exists before running the simulation.
+If, instead, you wish to run a single fold interactive (e.g. within RStudio), you should comment out lines 23-25 of `simulation_p5R20.R` and assign the variables `sim_number` and `snr_ix` manually.
 
-If, instead, you wish to run a single fold interactive (e.g. within RStudio), you should comment out lines 17-19 of `simulation_p5R20.R` and assign the variable `sim_number` to the specific fold value you wish to run.
 
+The results for each method are saved in method-specific sub-directories under `results/sim_p5R20`.
+For instance, the results for VCBART with adaptive split probabilities (the default we recommend) are saved in the directory `results/sim_p5R20/vcbart_adapt/`.
+Check the script to see which directories need to be created before running the simulation.
 
 Once all folds are run, you can run the script `tabulate_p5R20.R` to combine and tabulate the simulation results.
-Upon tabulating the results, you should be able to generate Figures 2 & 3
+Upon tabulating the results, you should be able to generate Figure 2 of the main text (`figure2.R`).
 
 ### Preparing the HRS dataset
 
