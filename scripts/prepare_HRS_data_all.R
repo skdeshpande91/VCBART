@@ -107,4 +107,4 @@ Z_plot[start_index_plot[8]:end_index_plot[8], "food_stamp"] <- 1
 
 
 save(X_all, Z_all, Y_all, n_all, X_plot, Z_plot, n_plot, cutpoints, 
-     file = "~/Documents/Research/VCBART/data/HRS_all.RData")
+     file = "data/HRS_all.RData")

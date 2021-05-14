@@ -54,4 +54,4 @@ if(any(attrition_coef[,"Pr(>|z|)"] < 0.05)){
 }
 
 data_df <- data_df[-which(is.na(data_df[,"Y"])),]
-save(attrition_df, data_df, file = "~/Dropbox/vcbart_revision_sims/data/HRS_causal_df.RData")
+save(attrition_df, data_df, file = "data/HRS_causal_df.RData")
