@@ -34,7 +34,7 @@ VCBART(Y_train, X_train, Z_train, n_train,
   \item{nd}{Number of MCMC samples to save. Default is 1000.}
   \item{rho_eps}{Auto-correlation parameter for compound symmetry error structure. Ignored if \code{error_structure = "ind"}. If \code{NULL}, the Gibbs sampler also draws rho from conditional posterior. Default is \code{NULL}. If specified, must be between 0 and 1.}
   \item{split_probs}{List of split probabilities. See details for how to specify. Ignored if \cite{split_probs_type = "adaptive"}.}
-  \item{init_alpha_z}{For adaptive split probabilities with fixed Dirichlet prior, \code{init_alpha_z} gives the prior Dirichlet concentration parameter so that theta ~ Dirichlet(alpha[1]/R, ..., alpha[R]/R). Default is \code{init_alpha_z = rep(R, times = R) so that theta has non-informative Dirichlet(1,...,1) prior.}
+  \item{init_alpha_z}{For adaptive split probabilities with fixed Dirichlet prior, \code{init_alpha_z} gives the prior Dirichlet concentration parameter so that theta ~ Dirichlet(alpha[1]/R, ..., alpha[R]/R). Default is \code{init_alpha_z = rep(R, times = R)} so that theta has non-informative Dirichlet(1,...,1) prior.}
   \item{a}{First hyperparameter for discretized Beta prior on split probability concentration parameter. Default is 1.}
   \item{b}{Second hyperparameter for discretized Beta prior on split probability concentration. Default is R.}
   \item{N_u}{Number of grid points for split probability concentration parameter.}
