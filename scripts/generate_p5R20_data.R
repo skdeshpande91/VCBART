@@ -1,5 +1,4 @@
 # Generate data for main simulation study
-
 library(MASS)
 n <- 500 # total number of subjects
 n_all <- rep(4, times = n)

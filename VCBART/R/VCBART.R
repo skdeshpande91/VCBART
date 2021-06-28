@@ -47,7 +47,7 @@ VCBART <- function(Y_train,
   n_obs_test <- nrow(X_test)
 
   if(sum(n_train) != n_obs_train) stop("Total number of training observations is not equal to number of rows of X_train")
-  if(sum(n_test) != n_obs_test) stop("Total number of testing observations is not equal to number of rows of X_train")
+  if(sum(n_test) != n_obs_test) stop("Total number of testing observations is not equal to number of rows of X_test")
   
   if(intercept == TRUE){
     X_train <- cbind(rep(1, times = n_obs_train), X_train)

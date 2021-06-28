@@ -68,7 +68,7 @@ void update_tree_ind(tree &x, double &sigma, std::vector<double> &theta, std::ve
     double PGnx = tree_pi.alpha[di.k]/pow(1.0 + dnx, tree_pi.beta[di.k]);
     double PGly, PGry;
     if(goodvars.size() > 1){ // we know there are variables we could split l and r on
-      PGly = tree_pi.alpha[di.k]/pow(1.0 + dnx, tree_pi.beta[di.k]); // depth of new nodes would be 1 + dnx
+      PGly = tree_pi.alpha[di.k]/pow(1.0 + 1.0 + dnx, tree_pi.beta[di.k]); // [SKD]: 28 June 2021 -- we were missing one of the 1.0's
       PGry = PGly;
     } else{ // only have v to work with, if it is exhausted at either child need PG = 0
       if( (int)(c-1) < L){ // v exhausted in the new left child l, new upper limit would be c-1
@@ -305,7 +305,7 @@ void update_tree_cs(tree &x, double &sigma, double &rho, std::vector<double> &th
     double PGnx = tree_pi.alpha[di.k]/pow(1.0 + dnx, tree_pi.beta[di.k]);
     double PGly, PGry;
     if(goodvars.size() > 1){ // we know there are variables we could split l and r on
-      PGly = tree_pi.alpha[di.k]/pow(1.0 + dnx, tree_pi.beta[di.k]); // depth of new nodes would be 1 + dnx
+      PGly = tree_pi.alpha[di.k]/pow(1.0 + 1.0 + dnx, tree_pi.beta[di.k]); // [SKD]: 28 June 2021 -- we were missing one of the 1.0's
       PGry = PGly;
     } else{ // only have v to work with, if it is exhausted at either child need PG = 0
       if( (int)(c-1) < L){ // v exhausted in the new left child l, new upper limit would be c-1
