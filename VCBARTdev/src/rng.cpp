@@ -43,7 +43,6 @@ void RNG::dirichlet(std::vector<double> &theta, std::vector<double> &concentrati
   for(int j = 0; j < p; j++) theta[j] = tmp_gamma[j]/tmp_sum;
 }
 
-
 int RNG::multinomial(const int &R, const std::vector<double> &probs){
   int x = 0;
   double cumsum = 0.0;

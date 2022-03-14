@@ -6,27 +6,31 @@
 #include "tree.h"
 
 
-//void fit(tree &t, data_info &di, double* ftemp); // vectorized fit of individual tree
-//void fit_vec(std::vector<tree> &t_vec, data_info &di, double* ftemp); // vectorized fit of entire ensemble
+void tree_traversal(suff_stat &ss, tree &t, data_info &di);
 
-//void fit(double* ftemp, tree &t, data_info &di);
-//void fit_vec(double* ftemp, std::vector<tree> &t_vec, data_info &di);
 
-//void fit(arma::vec &ftemp, tree &t, data_info &di);
-//void fit_vec(arma::vec &ftemp, std::vector<tree> &t_vec, data_info &di);
+//void fit_single_tree(double* ftemp, tree &t, data_info &di);
+void fit_ensemble(std::vector<double> &fit, std::vector<tree> &t_vec, data_info &di);
 
-//void compute_suff_stat_grow(suff_stat &sl, suff_stat &sr, suff_stat &sp, tree &t, tree::tree_cp nx, rule_t &rule, data_info &di);
-//void compute_suff_stat_prune(suff_stat &sl, suff_stat &sr, suff_stat &sp, tree &t, tree::tree_cp nl, tree::tree_cp nr, data_info &di);
-//void compute_suff_stat_vec(std::vector<suff_stat> &sv, tree::npv &bnv, tree &t, data_info &di);
 
-//double compute_lil(suff_stat &ss, tree_prior_info &tree_pi); // compute single leaf contribution to log integrated likelihood
-//double compute_lil_ratio_grow(tree &t, tree::tree_cp nx, rule_t &rule, data_info &di, tree_prior_info &tree_pi, bool debug);
-//double compute_lil_ratio_prune(tree &t, tree::tree_cp nxl, tree::tree_cp nxr, data_info &di, tree_prior_info &tree_pi, bool debug);
+void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat, int &nx_nid, rule_t &rule, tree &t, data_info &di);
+void compute_suff_stat_prune(suff_stat &orig_suff_stat, suff_stat &new_suff_stat, int &nl_nid, int &nr_nid, int &np_nid, tree &t, data_info &di);
 
-//void compute_mu_post(double& post_mean, double& post_sd, suff_stat &ss, tree_prior_info &tree_pi);
-//void draw_mu(tree &t, data_info &di, tree_prior_info &tree_pi, RNG &gen);
+//double compute_lil(suff_stat &ss, int &nid, double &sigma, data_info &di, tree_prior_info &tree_pi);
+//void draw_mu(tree &t, suff_stat &ss, double &sigma, data_info &di, tree_prior_info &tree_pi, RNG &gen);
 
-//void compute_cf_probs(size_t v_target, double* cf_probs, std::vector<tree> &t_vec, data_info &di);
-//void compute_cf_probs(size_t v_target, arma::vec &cf_probs, std::vector<tree> &t_vec, data_info &di);
+//std::string write_tree(tree &t, data_info &di, set_str_conversion &set_str);
+//void read_tree(tree &t, std::string &tree_string, data_info &di, set_str_conversion &set_str);
+
+void dfs(int i, std::vector<bool> &visited, std::vector<int> &comp, int &n, arma::mat &A);
+void find_components(std::vector<std::vector<int> > &components, arma::mat &A);
+std::pair<int,int> find_min_edge_weight(std::vector<int> &components, int &n, arma::mat &W);
+arma::mat boruvka(arma::mat &W);
+void get_edge_probs(std::vector<double> &cut_ix_probs, const arma::mat &cut_A, const arma::uvec &mst_index, const int &n);
+void graph_partition(std::set<int> &vals, std::set<int> &l_vals, std::set<int> &r_vals, std::vector<unsigned int> &adj_support, int &K, bool &reweight, RNG &gen);
+
+
+//void update_theta_cont(std::vector<double> &theta_cont, std::vector<int> &cont_var_count, int &cont_rule_count, double &a_cont, double &b_cont, int &p_cont, RNG &gen);
+//void update_theta_u_cat(std::vector<double> &theta_cat, std::vector<int> &cat_var_count, double &u_cat, double& a_cat, double& b_cat, int &p_cat, RNG &gen);
 
 #endif /* funs_h */
