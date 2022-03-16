@@ -14,12 +14,22 @@
 typedef std::vector<int>::iterator int_it; // iterator type for vectors of integers
 typedef std::vector<double>::iterator dbl_it; // iterator type vectors of doubles
 
+typedef std::map<int, std::vector<int>> suff_stat;
+// sufficient statistic map:
+//   key: node id of the leaf
+//   value: vector holding the index of all observations that land in the leaf
+typedef suff_stat::iterator suff_stat_it; // iterator for suff_stat
+// when it comes time to compute things like the log integrated likelihood we need to determine which observations belong to which subjects
+
+//typedef std::map<int, std::map<int, double>> leaf_summary;
+typedef std::map<int, std::vector<double>> leaf_summary;
+typedef leaf_summary::iterator leaf_sum_it; // iterator type for leaf_summary
 
 // sufficient statistic map:
 //   key: node id
-//   value: vector of length n; element i corresponds to subject i and contains vector of the indices for that subject that land in the corresponding bottom node
-typedef std::map<int, std::vector<std::vector<int>> suff_stat; //
-typedef suff_stat::iterator suff_stat_it; // iterator for sufficient statistic map
+//   value: another map
+//      key: subject id
+//      value: vector holding index of that subjects' observation
 
 // splitting rule: left child if x[v] < c and right child if x[v] >= c
 
@@ -73,9 +83,9 @@ public:
   int R; // total number of modifiers
   int R_cont; // total number of continuous modifiers
   int R_cat; // total number of categorical modifiers
-    
-  int* obs_id; // id[i] tells us to which subject observation i is associated
-  
+  int* subj_id; // id[i] tells us to which subject observation i is associated
+  int* ni; // how many observations are there per subject
+
   double* x; // pointer to matrix of covariates
   
   double* z_cont; // pointer to matrix of continuous effect modifiers
@@ -96,7 +106,8 @@ public:
     R = 0;
     R_cont = 0;
     R_cat = 0;
-    obs_id = 0; // 0 pointer
+    subj_id = 0; // 0 pointer
+    ni = 0; // 0 pointer
     x = 0; // 0 pointer
     z_cont = 0; // 0 pointer
     unif_cuts = 0; // 0 pointer

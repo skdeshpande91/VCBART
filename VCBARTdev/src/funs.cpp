@@ -10,24 +10,14 @@ void tree_traversal(suff_stat &ss, tree &t, data_info &di)
   
   tree::npv bnv;
   t.get_bots(bnv);
-  suff_stat_it ss_it; // used to look up to which element of ss a particular bottom node corresponds
+  suff_stat_it leaf_it;
   
   // add an element to suff stat map for each bottom node
   for(tree::npv_it it = bnv.begin(); it != bnv.end(); ++it){
     nid = (*it)->get_nid(); // bnv is a vector of pointers. it points to elements of bnv so we need (*it) to access the members of these elements
-    // add element to sufficient stats map with key = nid
-    // value is a of vector of vector of integers of length di.n recording which observations are assigned to this bottom node
-    ss.insert(std::pair<int, std::vector<std::vector<int> >(di.n, std::vector<int>()));
+    // add an element to ss with key = nid and value = vector
+    ss.insert(std::pair<int, std::vector<int>>(nid, std::vector<int>()));
   }
-  
-  /*
-  // for debugging purposes
-  Rcpp::Rcout << "[tree_traversal]: added elements to suff. stat. map for each bottom node!" << std::endl;
-  for(suff_stat_it ss_it = ss.begin(); ss_it != ss.end(); ++ss_it){
-    Rcpp::Rcout << "  nid = " << ss_it->first << "  n = " << ss_it->second.size() << std::endl;
-  }
-  Rcpp::Rcout << "[tree_traversal]: ready to start traversal!" << std::endl;
-  */
   
   // ready to loop over all observations
   for(int i = 0; i < di.N; i++){
@@ -41,12 +31,13 @@ void tree_traversal(suff_stat &ss, tree &t, data_info &di)
     }
     else{
       nid = bn->get_nid();
-      if(ss.count(nid) != 1) Rcpp::stop("[tree_traversal]: bottom node not included in sufficient statistic map!"); // should never be encountered
+      if(ss.count(nid) != 1) Rcpp::stop("[tree_traversal]: bottom node not included in sufficient statistic map!"); // we should *NEVER* hit this error
       else{
-        ss_it = ss.find(nid); // iterator now set to element of ss corresponding to the bottom node holding observation i
-        ss_it->second[di.obs_id[i]].push_back(i); // will need to check this carefully.
-      }
-    } // closes if/else checking that i-th observation's bottom node was in our map
+        // ss.find(nid)->second.push_back(i); // this might be getting too cute...
+        leaf_it = ss.find(nid);
+        leaf_it->second.push_back(i);
+      } // closes if/else checking that ss has an element corresponding to the leaf node to which i was mapped.
+    } // closes if/else checking that observation i maps to a valid leaf node
   } // closes loop over all observation
 }
 
@@ -81,13 +72,12 @@ void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat,
   
   // copy orig_suff_stat into new_suff_stat
   for(suff_stat_it it = orig_suff_stat.begin(); it != orig_suff_stat.end(); ++it){
-    //new_suff_stat.insert(std::pair<int,std::vector<int>>(it->first, it->second));
-    new_suff_stat.insert(std::pair<int, std::vector<std::vector<int>>>(it->first, it->second));
+    new_suff_stat.insert(std::pair<int,std::vector<int>>(it->first, it->second));
   }
   
   // now we manipulate new_suff_stat to drop nx and add nxl and nxr
-  new_suff_stat.insert(std::pair<int,std::vector<std::vector<int> > >(nxl_nid, std::vector<std::vector<int> >(di.n, std::vector<int>()))); // create map element for left child of nx
-  new_suff_stat.insert(std::pair<int,std::vector<std::vector<int> > >(nxr_nid, std::vector<std::vector<int> >(di.n, std::vector<int>()))); // create map element for right child of nx
+  new_suff_stat.insert(std::pair<int,std::vector<int>>(nxl_nid, std::vector<int>())); // create map element for left child of nx
+  new_suff_stat.insert(std::pair<int,std::vector<int>>(nxr_nid, std::vector<int>())); // create map element for right child of nx
   new_suff_stat.erase(nx_nid); // remove map element for nx as it is not a bottom leaf node in new tree
   
   suff_stat_it nxl_it = new_suff_stat.find(nxl_nid); // iterator at element for nxl in new sufficient stat map
@@ -95,35 +85,32 @@ void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat,
   
   // loop over all of the observations that were assigned to nx in the original tree
   // nx_it->first is just the node id for nx (nx_nid)
-  // nx_it->second is a vector of vector of integers; each element corresponds to a different subject
-  for(std::vector<std::vector<int> >::iterator subj_it = nx_it->second.begin(); subj_it != nx_it->second.end(); ++subj_it){
-    // subj_it poinst to each element of nx_it
-    for(int_it it = subj_it->begin(); it != subj_it->end(); ++it){
-      i = *it;
-      if(di.z_cont != 0) zz_cont = di.z_cont + i * di.R_cont;
-      if(di.z_cat != 0) zz_cat = di.z_cat + i * di.R_cat;
+  // nx_it->second is a vector that contains the indices of observations that land in nx
+  
+  for(suff_stat_it it = nx_it->second.begin(); it != nx_it->second.end(); ++it){
+    i = *it;
+    if(di.z_cont != 0) zz_cont = di.z_cont + i * di.R_cont;
+    if(di.z_cat != 0) zz_cat = di.z_cat + i * di.R_cat;
+    if(rule.is_aa == rule.is_cat){
+      Rcpp::stop("[compute_ss_grow]: encountered a rule that is both continuous and categorical!");
+    } else if(rule.is_aa){
+      // axis-aligned rule
+      if(zz_cont[rule.v_aa] < rule.c) nxl_it->second.push_back(i);
+      else if(zz_cont[rule.v_aa] >= rule.c) nxr_it->second.push_back(i);
+      else Rcpp::stop("[compute_ss_grow]: could not assign observation to left or right child");
+    }  else {
+      // categorical rule
+      // we need to see whether i-th observation's value of the categorical pred goes to left or right
+      // std::set.count returns 1 if the value is in the set and 0 otherwise
+      l_count = rule.l_vals.count(zz_cat[rule.v_cat]);
+      r_count = rule.r_vals.count(zz_cat[rule.v_cat]);
       
-      if(rule.is_aa == rule.is_cat){
-        Rcpp::stop("[compute_ss_grow]: encountered a rule that is both continuous and categorical!");
-      } else if(rule.is_aa){
-        // axis-aligned rule
-        if(zz_cont[rule.v_aa] < rule.c) nxl_it->second[di.sub_id[i]].push_back(i); // check this syntax
-        else if(zz_cont[rule.v_aa] >= rule.c) nxr_it->second[di.sub_id[i]].push_back(i); // check this syntax
-        else Rcpp::stop("[compute_ss_grow]: could not assign observation to left or right child");
-      }  else {
-        // categorical rule
-        // we need to see whether i-th observation's value of the categorical pred goes to left or right
-        // std::set.count returns 1 if the value is in the set and 0 otherwise
-        l_count = rule.l_vals.count(zz_cat[rule.v_cat]);
-        r_count = rule.r_vals.count(zz_cat[rule.v_cat]);
-        
-        if(l_count == 1 && r_count == 0) nxl_it->second[di.sub_id[i]].push_back(i); // check this syntax
-        else if(l_count == 0 && r_count == 1) nxr_it->second[di.sub_id[i]].push_back(i); // check this syntax
-        else if(l_count == 1 && r_count == 1) Rcpp::stop("[compute_ss_grow]: observation goes to both left and right child!");
-        else Rcpp::stop("[compute_ss_grow]: observation does not go to either left or right child!");
-      } // closes if/else checking whether
-    } // closes loop over observations for a particular subject
-  } // closes loop over all entries in nx, each entry corresponding to a single subject
+      if(l_count == 1 && r_count == 0) nxl_it->second.push_back(i);
+      else if(l_count == 0 && r_count == 1) nxr_it->second.push_back(i);
+      else if(l_count == 1 && r_count == 1) Rcpp::stop("[compute_ss_grow]: observation goes to both left and right child!");
+      else Rcpp::stop("[compute_ss_grow]: observation does not go to either left or right child!");
+    } // closes if/else checking whether it is a continuous or categorical decision rule
+  }
 }
 
 
@@ -140,63 +127,128 @@ void compute_suff_stat_prune(suff_stat &orig_suff_stat, suff_stat &new_suff_stat
   new_suff_stat.clear();
   // this makes a completely new copy of orig_suff_stat
   for(suff_stat_it ss_it = orig_suff_stat.begin(); ss_it != orig_suff_stat.end(); ++ss_it){
-    new_suff_stat.insert(std::pair<int, std::vector<std::vector<int>>>(ss_it->first, ss_it->second));
+    new_suff_stat.insert(std::pair<int,std::vector<int>>(ss_it->first, ss_it->second));
   }
-  new_suff_stat.insert(std::pair<int, std::vector<std::vector<int> > >(np_nid, std::vector<std::vector<int> >(di.n, std::vector<int>()))); // create new map element for np
+  new_suff_stat.insert(std::pair<int,std::vector<int>>(np_nid, std::vector<int>())); // add element for np in new suff stat map
   new_suff_stat.erase(nl_nid); // delete element for nl in new suff stat map since nl has been pruned
   new_suff_stat.erase(nr_nid); // delete element for nr in new suff stat map since nr has been pruned
   
   if(new_suff_stat.count(np_nid) != 1) Rcpp::stop("[compute_ss_prune]: didn't create element in new suff stat map for np correctly");
   suff_stat_it np_it = new_suff_stat.find(np_nid); // iterator at element for np in new suff stat map
   
-  // time to populate np_it, first with the indices from the left child and then with indices from the right child
-  for(std::vector<std::vector<int> >::iterator subj_it = nl_it->second.begin(); subj_it != nl_it->second.end(); ++subj_it){
-    for(int_it it = subj_it->begin(); it != subj_it->end(); ++it){
-      i = *it;
-      np_it->second[di.sub_id[i]].push_back(i);
-    }
-  }
-  for(std::vector<std::vector<int> >::iterator subj_it = nr_it->second.begin(); subj_it != nr_it->second.end(); ++subj_it){
-    for(int_it it = subj_it->begin(); it != subj_it->end(); ++it){
-      i = *it;
-      np_it->second[di.sub_id[i]].push_back(i);
-    }
-  }
+  // time to populate np_it
+  // first let's add the elements from nl_it
+  for(int_it it = nl_it->second.begin(); it != nl_it->second.end(); ++it) np_it->second.push_back( *it );
+  for(int_it it = nr_it->second.begin(); it != nr_it->second.end(); ++it) np_it->second.push_back( *it );
 }
 
 
 void compute_p_theta_ind(int j, arma::mat &P, arma::vec &Theta, suff_stat &ss, double &sigma, data_info &di, tree_prior_info &tree_pi)
 {
   int L = ss.size(); // number of leafs
-  arma::mat P = arma::zeros<arma::mat>(L,L);
+  arma::mat P = arma::zeros<arma::mat>(L,L); // precision matrix of jumps
   P.eye();
   P.diag() *= 1.0/pow(tree_pi[j].tau, 2.0); // at this point P is just the diagonal matrix
   
   arma::vec Theta = arma::ones<arma::vec>(L);
   Theta *= tree_pi[j].mu0/pow(tree_pi[j].tau, 2.0);
+  // mu | all else ~ N(P^-1 Theta, P^-1)
   
-  
+  // the keys in ss are the node ids (nid) of the leaf node in each tree
+  // we need to map those nid's to the set 0,..., L-1 so that we can populate the matrix P correctly
+  // we need to save sum of x_itj^2 in each leaf
   std::map<int, int> leaf_id_map; // maps each leaf's nid to the correct row in P
   int l = 0;
-  int t = 0;
+  int i = 0;
   for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
     leaf_id_map.insert(std::pair<int, int>(l_it->first, l));
     ++l;
   }
-  
   for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
-    l = leaf_id_map.find(l_it->first)->second; // gets the index in P for the corresponding leaf
-    for(std::vector<std::vector<int>>::iterator subj_it = l_it->second.begin(); subj_it != l_it->second.end(); ++subj_it){
-      // loop over the individual subjects
-      for(int_it i_it = subj_it->begin(); i_it != subj_it->end(); ++i_it){
-        // loop over observations for individual subjects that are in this leaf
-        i = *i_it;
-        P(l,l) += 1.0/pow(sigma,2.0) * di.x[j + i*di.p] * di.x[j + i * di.p];
-        Theta(l) += 1.0/pow(sigma, 2.0) * di.x[j + i * di.p] * di.rp[j + i * di.p]
-      }
+    // l_it loops over all of the leafs in the tree
+    l = leaf_id_map.find(l_it->first)->second; // gets the index in P and theta for the corresponding leaf
+    for(int_it it = l_it->second.begin(); it != l_it->second.end(); ++it){
+      // we need the sum of all x_itj's for this leaf
+      i = *it;
+      P(l,l) += 1.0/pow(sigma, 2.0) * pow(di.x[j + i * di.p], 2.0);
+      Theta(l) += 1.0/pow(sigma, 2.0) * di.x[j + i * di.p] * di.rp[i];
     }
   }
 }
+
+
+void compute_p_theta_cs(int j, arma::mat &P, arma::vec &Theta, suff_stat &ss, double &rho, double &sigma, data_info &di, tree_prior_info &tree_pi)
+{
+  int L = ss.size();
+  arma::mat P = arma::zeros<arma::mat>(L,L);
+  P.eye();
+  P.diag() *= 1.0/pow(tree_pi[j].tau, 2.0); // at this point P is just the prior precision matrix of the jumps mu
+  
+  arma::vec Theta = arma::ones<arma::vec>(L);
+  Theta *= tree.pi[j].mu0/pow(tree_pi[j].tau, 2.0); // at this point Theta just captures the contribution from the prior to the posterior mean of jumps mu
+  
+  // the keys in ss are the node ids (nid) of the leaf node in each tree
+  // we need to map those nid's to the set 0,..., L-1 so that we can populate the matrix P correctly
+  std::map<int, std::vector<double>> x_sums; // holds the sum x_itj for each observation in each leaf
+  std::map<int, std::vector<double>> xx_sums; // holds the sum of x_itj^2 for each observation in each leaf
+  std::map<int, std::vector<double>> xr_sums; // holds the sum of x_itj & rp_i for each observation in each leaf
+  std::vector<double> r_sum(di.n, 0.0); // holds the sum of each subjects' partial residuals (across all leafs)
+  
+  std::map<int, std::vector<double>>::iterator xs_it; // iterator to get sum of x_ijt's in a particular leaf
+  std::map<int, std::vector<double>>::iterator xs_it_ll; // iterator used in the inner loop over leafs in computing P(l,ll)
+  std::map<int, std::vector<double>>::iterator xxs_it; // iterator to get sum of x_ijt^2's in particular leaf
+  std::map<int, std::vector<double>>::iterator xrs_it; // iterator to get sum of x_ijt * r_it in particular lear
+  
+  int l = 0;
+  int i;
+  int subj_id;
+  for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
+    leaf_id_map.insert(std::pair<int, int>(l_it->first, l)); // we can now map leaf with node id l_it->first to the l-th row of P
+    
+    x_sums.insert(std::pair<int, std::vector<double>>(l_it->first, std::vector<double>(di.n, 0.0)));
+    xx_sums.insert(std::pair<int, std::vector<double>>(l_it->first, std::vector<double>(di.n, 0.0)));
+    xr_sums.insert(std::pair<int, std::vector<double>>(l_it->first, std::vector<double>(di.n, 0.0)));
+  
+    xs_it = x_sums.find(l_it->first);
+    xxs_it = xx_sums.find(l_it->first);
+    xrs_it = xr_sums.find(l_it->first);
+  
+    for(int_it it = l_it->second.begin(); it != l_it->second.end(); ++it){
+      // it iterates over the indices of all observations that landed in leaf l_it
+      i = *it;
+      subj_id = di.subj_id[i]; // which subject contributed observation i to leaf l_it
+      xs_it->second[subj_id] += di.x[j + i*di.p]; // increment running sum of x_ijt for this subject in this leaf
+      xxs_it->second[subj_id] += pow(di.x[j + i * di.p], 2.0); // increment running sum of x_ijt*x_ijt for this subject in this leaf
+      xrs_it->second[subj_id] += di.x[j+i*di.p] * di.rp[i]; // increment running sum of x_ijt * r_it for this subject in this leaf
+      r_sum[subj_id] += di.rp[i]; // increment running sum of the partial residual
+    }
+    ++l; // incremember our counter. safer to write for loop with a paired iterator but that's messy...
+  }
+  
+  // now that we have all of the leaf-wise summaries computed, we are ready to asemble P and Theta
+  // note we fill in the lower triangle of P first
+  for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
+    // l_it loops over all leafs in the tree
+    l = leaf_id_map.find(l_it->first)->second; // leaf l_it goes to the l^th row of P & Theta
+    P(l,l) += 1.0/pow(sigma, 2.0) * xx_sums.find(l_it->first)->second[subj_ix];
+    xs_it = x_sums.find(l_it->first); // we will need the sum of x's in leaf l for multiple calculations
+    xr_it = xr_sums.find(l_it->first);
+    for(suff_stat_it ll_it = ss.begin(); ll_it != ss.end(); ++ll_it){
+      ll = leaf_id_map.find(ll_it->first)->second; // leaf_ll_it goes to the ll^th row of P & Theta
+      xs_it_ll = x_sums->find(ll_it->first);
+      for(int subj_ix = 0; subj_ix < di.n; subj_ix++){
+        P(l,ll) -= 1.0/pow(sigma,2.0) * rho/(1.0 - rho) * 1.0/(1 + rho* ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix] * xs_it_ll->second[subj_ix];
+      }
+    }
+    for(int subj_ix = 0; subj_ix < di.n; subj_ix++){
+      Theta(l) += 1.0/pow(sigma, 2.0) * 1.0/(1.0 - rho) * xr_it->second[subj_ix];
+      Theta(l) -= 1.0/pow(sigma,2.0) *  rho/(1.0 - rho) * r_sum[subj_ix]/(1.0  - rho * ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix];
+    }
+  }
+}
+
+
+
 
 double compute_lil(int &j, arma::mat &P, arma::vec &Theta, tree_prior_info &tree_pi)
 {
