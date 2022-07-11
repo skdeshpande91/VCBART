@@ -13,6 +13,10 @@ double RNG::log_uniform(){
   // if U ~ Uniform(0,1), then (-1 * log(U)) ~ Exponential(1)
 }
 
+double RNG::gumbel(){
+  return -1.0 * log(exponential(1.0));
+}
+
 double RNG::normal(double mu, double sd ){
   return R::rnorm(mu,sd);
 }
@@ -29,6 +33,25 @@ double RNG::chi_square(double df){
   return R::rchisq(df);
 }
 
+int RNG::categorical(std::vector<double> &probs){
+  int n = probs.size();
+  int output = 0;
+  double tmp = 0.0;
+  if(n > 1){
+    double max_quantity = log(probs[0]) + gumbel();
+    for(int i = 1; i < n; i++){
+      tmp = log(probs[i]) + gumbel();
+      if(tmp > max_quantity){
+        max_quantity = tmp;
+        output = i;
+      }
+    }
+  } else{
+    // this is totally redundant
+    output = 0;
+  }
+  return output;
+}
 
 void RNG::dirichlet(std::vector<double> &theta, std::vector<double> &concentration)
 {
@@ -43,33 +66,6 @@ void RNG::dirichlet(std::vector<double> &theta, std::vector<double> &concentrati
   for(int j = 0; j < p; j++) theta[j] = tmp_gamma[j]/tmp_sum;
 }
 
-int RNG::multinomial(const int &R, const std::vector<double> &probs){
-  int x = 0;
-  double cumsum = 0.0;
-  double unif = uniform(0,1);
-  for(int r = 0; r < R; r++){
-    cumsum += probs[r];
-    if(unif < cumsum){
-      x = r;
-      break;
-    }
-  }
-  return(x);
-}
-
-int RNG::multinomial(const int &R, std::vector<double>* probs){
-  int x = 0;
-  double cumsum = 0.0;
-  double unif = uniform(0.0,1.0);
-  for(int r = 0; r < R; r++){
-    cumsum += probs->at(r);
-    if(unif < cumsum){
-      x = r;
-      break;
-    }
-  }
-  return(x);
-}
 
 arma::vec RNG::std_norm_vec(int d){
   arma::vec results(d);

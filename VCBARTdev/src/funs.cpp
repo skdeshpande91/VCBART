@@ -58,6 +58,7 @@ void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat,
 {
   double* zz_cont;
   int* zz_cat;
+  double tmp_z = 0.0;
   int i;
   int l_count;
   int r_count;
@@ -91,14 +92,17 @@ void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat,
     i = *it;
     if(di.z_cont != 0) zz_cont = di.z_cont + i * di.R_cont;
     if(di.z_cat != 0) zz_cat = di.z_cat + i * di.R_cat;
-    if(rule.is_aa == rule.is_cat){
-      Rcpp::stop("[compute_ss_grow]: encountered a rule that is both continuous and categorical!");
-    } else if(rule.is_aa){
+    tmp_z = 0.0;
+    
+    if(rule.is_aa && !rule.is_cat){
       // axis-aligned rule
       if(zz_cont[rule.v_aa] < rule.c) nxl_it->second.push_back(i);
       else if(zz_cont[rule.v_aa] >= rule.c) nxr_it->second.push_back(i);
-      else Rcpp::stop("[compute_ss_grow]: could not assign observation to left or right child");
-    }  else {
+      else{
+        Rcpp::Rcout << "  i = " << i << " v = " << rule.v_aa+1 >> "  value = " << zz_cont[rule.v_aa] << " cutpoint = " << rule.c << std::endl;
+        Rcpp::stop("[compute_ss_grow]: could not assign observation to left or right child in axis-aligned decision!");
+      }
+    } else if(!rule.is_aa && rule.is_cat){
       // categorical rule
       // we need to see whether i-th observation's value of the categorical pred goes to left or right
       // std::set.count returns 1 if the value is in the set and 0 otherwise
@@ -108,13 +112,34 @@ void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat,
       if(l_count == 1 && r_count == 0) nxl_it->second.push_back(i);
       else if(l_count == 0 && r_count == 1) nxr_it->second.push_back(i);
       else if(l_count == 1 && r_count == 1) Rcpp::stop("[compute_ss_grow]: observation goes to both left and right child!");
-      else Rcpp::stop("[compute_ss_grow]: observation does not go to either left or right child!");
-    } // closes if/else checking whether it is a continuous or categorical decision rule
-  }
+      else{
+        Rcpp::Rcout << "  i = " << i << " v = " << rule.v_cat+1 << "  value = " << zz_cat[rule.v_aa] << std::endl;
+        Rcpp::Rcout << "left values:";
+        for(set_it levels_it = rule.l_vals.begin(); levels_it != rule.l_vals.end(); ++levels_it) Rcpp::Rcout << " " << *levels_it;
+        Rcpp::Rcout << std::endl;
+        
+        Rcpp::Rcout << "right values:";
+        for(set_it levels_it = rule.r_vals.begin(); levels_it != rule.r_vals.end(); ++levels_it) Rcpp::Rcout << " " << *levels_it;
+        Rcpp::Rcout << std::endl;
+        
+        Rcpp::stop("[compute_ss_grow]: could not assign observation to left or right child in categorical rule!");
+      }
+    } else if(!rule.is_aa && !rule.is_cat){
+      // random combination rule
+      tmp_z = 0.0;
+      for(rc_it rcit = rule.rc_weight.begin(); rcit != rule.rc_weight.end(); ++rcit) tmp_z += (rcit->second) * zz_cont[rcit->first];
+      if(tmp_z < rule.c) nxl_it->second.push_back(i);
+      else if(tmp_z >= rule.c) nxr_it->second.push_back(i);
+      else{
+        Rcpp::Rcout << "  i = " << i << " tmp_z = " << tmp_z << " cutpoint = " << rule.c << std::endl;
+        Rcpp::stop("[compute_ss_grow]: could not resolve random combination rule!");
+      }
+    } else{
+      // we should never hit this part of the code
+      Rcpp::stop("[compute_ss_grow]: cannot resolve the type of decision rule!");
+    }
+  } // closes loop over observations in the leaf
 }
-
-
-
 
 void compute_suff_stat_prune(suff_stat &orig_suff_stat, suff_stat &new_suff_stat, int &nl_nid, int &nr_nid, int &np_nid, tree &t, data_info &di)
 {
@@ -184,31 +209,39 @@ void compute_p_theta_cs(int j, arma::mat &P, arma::vec &Theta, suff_stat &ss, do
   P.eye();
   P.diag() *= 1.0/pow(tree_pi[j].tau, 2.0); // at this point P is just the prior precision matrix of the jumps mu
   
-  arma::vec Theta = arma::ones<arma::vec>(L);
-  Theta *= tree.pi[j].mu0/pow(tree_pi[j].tau, 2.0); // at this point Theta just captures the contribution from the prior to the posterior mean of jumps mu
+  //arma::vec Theta = arma::ones<arma::vec>(L);
+  //Theta *= tree.pi[j].mu0/pow(tree_pi[j].tau, 2.0); // at this point Theta just captures the contribution from the prior to the posterior mean of jumps mu
+  
+  arma::vec Theta = arma::zeros<arma::vec>(L);
+  
   
   // the keys in ss are the node ids (nid) of the leaf node in each tree
   // we need to map those nid's to the set 0,..., L-1 so that we can populate the matrix P correctly
-  std::map<int, std::vector<double>> x_sums; // holds the sum x_itj for each observation in each leaf
-  std::map<int, std::vector<double>> xx_sums; // holds the sum of x_itj^2 for each observation in each leaf
-  std::map<int, std::vector<double>> xr_sums; // holds the sum of x_itj & rp_i for each observation in each leaf
-  std::vector<double> r_sum(di.n, 0.0); // holds the sum of each subjects' partial residuals (across all leafs)
   
-  std::map<int, std::vector<double>>::iterator xs_it; // iterator to get sum of x_ijt's in a particular leaf
-  std::map<int, std::vector<double>>::iterator xs_it_ll; // iterator used in the inner loop over leafs in computing P(l,ll)
-  std::map<int, std::vector<double>>::iterator xxs_it; // iterator to get sum of x_ijt^2's in particular leaf
-  std::map<int, std::vector<double>>::iterator xrs_it; // iterator to get sum of x_ijt * r_it in particular lear
+  // we need to compute the following things:
+  // 1. Sum of partial residuals (across all leafs) for each individual
+  // 2. Sum of x_itj for each individual in each leaf
+  // 3. Sum of x_itj * rp_i across all individuals in each leaf
+  std::map<int, std::vector<double>> x_sums; // holds the sum of x_itj for each individual in each leaf
+  std::map<int, double> xx_sums; // holds the sum of (x_itj)^2 across all individuals in each leaf
+  std::map<int, double> xr_sums; // holds sum of (x_itj)*r_it across all individuals in each leaf
+  std::vector<double> r_sum(di.n,0.0);
+  
+  
+  //std::map<int, std::vector<double>>::iterator xs_it; // iterator to get sum of x_ijt's in a particular leaf
+  //std::map<int, std::vector<double>>::iterator xs_it_ll; // iterator used in the inner loop over leafs in computing P(l,ll)
+  //std::map<int, std::vector<double>>::iterator xxs_it; // iterator to get sum of x_ijt^2's in particular leaf
+  //std::map<int, std::vector<double>>::iterator xrs_it; // iterator to get sum of x_ijt * r_it in particular lear
   
   int l = 0;
   int i;
   int subj_id;
   for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
     leaf_id_map.insert(std::pair<int, int>(l_it->first, l)); // we can now map leaf with node id l_it->first to the l-th row of P
-    
     x_sums.insert(std::pair<int, std::vector<double>>(l_it->first, std::vector<double>(di.n, 0.0)));
-    xx_sums.insert(std::pair<int, std::vector<double>>(l_it->first, std::vector<double>(di.n, 0.0)));
-    xr_sums.insert(std::pair<int, std::vector<double>>(l_it->first, std::vector<double>(di.n, 0.0)));
-  
+    xx_sums.insert(std::pair<int, double>(l_it->first, 0.0)); // initialize total sum of x_ijt^2 in each leaf
+    xr_sums.insert(std::pair<int, double>(l_it->first, 0.0)); // initialze total sum of x_itj*r_it in each leaf
+    
     xs_it = x_sums.find(l_it->first);
     xxs_it = xx_sums.find(l_it->first);
     xrs_it = xr_sums.find(l_it->first);
@@ -218,33 +251,46 @@ void compute_p_theta_cs(int j, arma::mat &P, arma::vec &Theta, suff_stat &ss, do
       i = *it;
       subj_id = di.subj_id[i]; // which subject contributed observation i to leaf l_it
       xs_it->second[subj_id] += di.x[j + i*di.p]; // increment running sum of x_ijt for this subject in this leaf
-      xxs_it->second[subj_id] += pow(di.x[j + i * di.p], 2.0); // increment running sum of x_ijt*x_ijt for this subject in this leaf
-      xrs_it->second[subj_id] += di.x[j+i*di.p] * di.rp[i]; // increment running sum of x_ijt * r_it for this subject in this leaf
-      r_sum[subj_id] += di.rp[i]; // increment running sum of the partial residual
+      xxs_it->second += pow(di.x[j + i*di.p], 2.0); // increment running total of x_ijt*x_ijt for ALL subjects in this leaf
+      xrs_it->second += di.x[j + i*di.p] * di.rp[i]; // increment running total of x_ijt * r_it for ALL subjects in this leaf
+      r_sums[subj_id] += di.rp[i]; // increment running sum of partial residual for this subject.
     }
     ++l; // incremember our counter. safer to write for loop with a paired iterator but that's messy...
   }
   
   // now that we have all of the leaf-wise summaries computed, we are ready to asemble P and Theta
-  // note we fill in the lower triangle of P first
+  
+  // we start with the diagonal elements of P
   for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
-    // l_it loops over all leafs in the tree
-    l = leaf_id_map.find(l_it->first)->second; // leaf l_it goes to the l^th row of P & Theta
-    P(l,l) += 1.0/pow(sigma, 2.0) * xx_sums.find(l_it->first)->second[subj_ix];
-    xs_it = x_sums.find(l_it->first); // we will need the sum of x's in leaf l for multiple calculations
-    xr_it = xr_sums.find(l_it->first);
-    for(suff_stat_it ll_it = ss.begin(); ll_it != ss.end(); ++ll_it){
-      ll = leaf_id_map.find(ll_it->first)->second; // leaf_ll_it goes to the ll^th row of P & Theta
-      xs_it_ll = x_sums->find(ll_it->first);
-      for(int subj_ix = 0; subj_ix < di.n; subj_ix++){
-        P(l,ll) -= 1.0/pow(sigma,2.0) * rho/(1.0 - rho) * 1.0/(1 + rho* ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix] * xs_it_ll->second[subj_ix];
+    l = leaf_id_map.find(l_it->first)->second;
+    P(l,l) += 1.0/pow(sigma, 2.0) * xx_sums.find(l_it->first)->second;
+    Theta(l) += xr_sums.find(l_it->first)->second;
+  }
+  
+  // we now need to loop over *all* subjects
+  for(int subj_ix = 0; subj_ix < di.n; subj_ix++){
+    
+    for(suff_stat_it l_it = ss.begin(); l_it != ss.end(); ++l_it){
+      l = leaf_id_map.find(l_it->first)->second;
+      xs_it = x_sums.find(l_it->first);
+      
+      Theta(l) -= r_sums[subj_ix]/(1 + rho * ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix];
+      
+      // now we're ready to do the off-diagonal elements of P
+      for(suff_stat_it ll_it = ss.begin(); ll_it != l_it; ++ll_it){
+        ll = leaf_id_map.find(ll_it->first)->second;
+        xs_it_ll = x_sums.find(ll_it->first);
+        
+        P(l,ll) -= 1.0/pow(sigma,2.0) * rho/(1.0 - rho) * 1.0/(1 + rho * ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix] * xs_it_ll->second[subj_ix];
+        P(ll,l) -= 1.0/pow(sigma,2.0) * rho/(1.0 - rho) * 1.0/(1 + rho * ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix] * xs_it_ll->second[subj_ix];
       }
     }
-    for(int subj_ix = 0; subj_ix < di.n; subj_ix++){
-      Theta(l) += 1.0/pow(sigma, 2.0) * 1.0/(1.0 - rho) * xr_it->second[subj_ix];
-      Theta(l) -= 1.0/pow(sigma,2.0) *  rho/(1.0 - rho) * r_sum[subj_ix]/(1.0  - rho * ( (double) di.ni[subj_ix] - 1.0)) * xs_it->second[subj_ix];
-    }
   }
+  
+  // remember to rescale and add in the prior stuff for theta
+  Theta *= 1.0/pow(sigma, 2.0) * 1.0/(1.0 - rho);
+  Theta += tree.pi[j].mu0/pow(tree_pi[j].tau, 2.0);
+  
 }
 
 

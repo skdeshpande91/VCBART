@@ -12,6 +12,7 @@ tree::tree(){
   rule.is_aa = true;
   rule.is_cat = false;
   rule.v_aa = 0;
+  rule.rc_weight = std::map<int, double>();
   rule.c = 0.0;
   
   rule.v_cat = 0;
@@ -40,7 +41,6 @@ void tree::to_null()
   }
   mu = 0.0;
   rule.clear();
-  
   p = 0;
   l = 0;
   r = 0;
@@ -61,12 +61,11 @@ void tree::print(bool pc) const // pc is flag to print children
     // tree is just the top node
     Rcpp::Rcout << "  mu: " << mu << std::endl;
   } else { // internal node or nnog or top node
-    if(!rule.is_cat && !rule.is_rc){
-      // axis aligned split
-      Rcpp::Rcout << "  split on Z_cont[," << rule.v_aa+1 << "] at c = " << rule.c << std::endl;
+    if(rule.is_aa && !rule.is_cat){
+      Rcpp::Rcout << "  axis-aligned split on Z_cont[," << rule.v_aa+1 << "] at c = " << rule.c << std::endl;
     } else if(!rule.is_aa && rule.is_cat){
-      // categorical split
-      Rcpp::Rcout << "  split on Z_cat[," << rule.v_cat + 1 << "]" << std::endl;
+      // categorical decision rule
+      Rcpp::Rcout << "  split on categorical Z_cat[," << rule.v_cat+1 << "]" << std::endl;
       Rcpp::Rcout << "    left levels: ";
       for(set_it it = rule.l_vals.begin(); it != rule.l_vals.end(); ++it) Rcpp::Rcout << " " << *it;
       Rcpp::Rcout << std::endl;
@@ -74,11 +73,20 @@ void tree::print(bool pc) const // pc is flag to print children
       Rcpp::Rcout << "    right levels: ";
       for(set_it it = rule.r_vals.begin(); it != rule.r_vals.end(); ++it) Rcpp::Rcout << " " << *it;
       Rcpp::Rcout << std::endl;
-    } else if(rule.is_cat == rule.is_rc){
-      Rcpp::Rcout << "cannot determine rule type!!" << std::endl;
-    } else if(!p){
-      // this was already the top node
-      Rcpp::Rcout << " tree contains only the root node" << std::endl;
+    } else if(!rule.is_aa && !rule.is_cat){
+      // random combination rule
+      Rcpp::Rcout << "  split on random combination:" << std::endl;
+      Rcpp::Rcout << "      vars:";
+      for(rc_it it = rule.rc_weight.begin(); it != rule.rc_weight.end(); ++it) Rcpp::Rcout << " " << it->first + 1; // R is 1-indexed
+      Rcpp::Rcout << std::endl;
+      Rcpp::Rcout << "      weights:";
+      for(rc_it it = rule.rc_weight.begin(); it != rule.rc_weight.end(); ++it) Rcpp::Rcout << " " << it->second;
+      Rcpp::Rcout << std::endl;
+      Rcpp::Rcout << "      cutpoint = " << rule.c << std::endl;
+    } else if(rule.is_aa && rule.is_cat){
+      Rcpp::stop("[tree::print]: decision rule cannot be both axis-aligned continuous rule and a categorical rule!");
+    } else{
+      Rcpp::stop("[tree::print]: something has gone quite wrong here");
     }
   }
   
@@ -223,27 +231,25 @@ tree::tree_p tree::get_ptr(int nid)
 tree::tree_cp tree::get_bn(double* z_cont, int* z_cat)
 {
   if(!l) return this; // node has no left child, so it must be a leaf
+  double tmp_z = 0.0;
   int l_count = 0;
   int r_count = 0;
   
-  if(rule.is_aa == rule.is_cat){
-    Rcpp::Rcout << "[get_bn]: encountered invalid rule; rule is both continuous and categorical" << std::endl;
-    return 0;
-  } else if(rule.is_aa){
-    // axis-aligned split
+  if(rule.is_aa && !rule.is_cat){
+    // axis-aligned rule
     if(z_cont != 0){
       if(z_cont[rule.v_aa] < rule.c) return l->get_bn(z_cont, z_cat);
-      else if(z_cont[rule_v.aa] >= rule.c) return r->get_bn(z_cont, z_cat);
+      else if(z_cont[rule.v_aa] >= rule.c) return r->get_bn(z_cont, z_cat);
       else{
-        Rcpp::Rcout << "[get_bn]: could not resolve continuous decision rule: " <<std::endl;
+        Rcpp::Rcout << "[get_bn]: could not resolve axis-aligned decision rule: " <<std::endl;
         Rcpp::Rcout << "    z = " << z_cont[rule.v_aa] << " and c = " << rule.c << std::endl;
         return 0;
       }
     } else{
-      Rcpp::Rcout << "[get_bn]: encountered continuous decision rule but not continuous modifiers supplied" << std::endl;
+      Rcpp::Rcout << "[get_bn]: encountered continuous decision rule but no continuous predictors were supplied!" << std::endl;
       return 0;
     }
-  } else{
+  } else if(!rule.is_aa && rule.is_cat){
     // categorical decision rule
     if(z_cat != 0){
       l_count = rule.l_vals.count(z_cat[rule.v_cat]);
@@ -254,11 +260,33 @@ tree::tree_cp tree::get_bn(double* z_cont, int* z_cat)
       else if(l_count == 0 && r_count == 0){
         Rcpp::Rcout << "[get_bn]: could not find value of categorical predictor in either left or right cutset!" << std::endl;
         return 0;
-      } else{
+      } else{ // l_count == 1 & r_count == 1
         Rcpp::Rcout << "[get_bn]: value of categorical predictor in both left & right cutset!" << std::endl;
         return 0;
       }
+    } else{
+      Rcpp::Rcout << "[get_bn]: encountered categorical decision rule but no categorical predictors were supplied!" << std::endl;
+      return 0;
     }
+  } else if(!rule.is_aa && !rule.is_cat){
+    // random combination rule
+    if(z_cont != 0){
+      tmp_z = 0.0;
+      for(rc_it it = rule.rc_weight.begin(); it != rule.rc_weight.end(); ++it) tmp_z += (it->second) * z_cont[it->first];
+      if(tmp_z < rule.c) return l->get_bn(z_cont, z_cat);
+      else if(tmp_z >= rule.c) return r->get_bn(z_cont, z_cat);
+      else{
+        Rcpp::Rcout << "[get_bn]: unable to resolve a rc decision rule" << std::endl;
+        return 0;
+      }
+    } else{
+      Rcpp::Rcout << "[get_bn]: encountered random combination rule but no continuous predictors were supplied!" << std::endl;
+      return 0;
+    }
+  } else{
+    // rule.is_aa & rule.is_cat are both trule
+    Rcpp::Rcout << "[get_bn]: rule cannot be both axis-aligned and categorical!" << std::endl;
+    return 0;
   }
 }
 
@@ -293,9 +321,15 @@ void tree::birth(int nid, rule_t rule)
   np->l = l;
   np->r = r;
   
-  np->rule.copy(rule);
-  np->mu = 0.0; // we will overwrite these
-  
+  np->rule.is_aa = rule.is_aa;
+  np->rule.is_cat = rule.is_cat;
+  np->rule.v_aa = rule.v_aa;
+  np->rule.rc_weight = rule.rc_weight;
+  np->rule.c = rule.c;
+  np->rule.v_cat = rule.v_cat;
+  np->rule.l_vals = rule.l_vals;
+  np->rule.r_vals = rule.r_vals;
+  np->mu = 0.0; // we will overwrite this later
   l->p = np;
   r->p = np;
   
@@ -378,15 +412,14 @@ void tree::cp(tree_p n, tree_cp o)
   n->mu = o->mu;
   // not 100% sure if it's valid to do n->rule = o->rule
   // but better to be safe and deliberately copy all members
-  n->rule.copy(o->rule);
-  
-  //n->rule.is_aa = o->rule.is_aa;
-  //n->rule.is_cat = o->rule.is_cat;
-  //n->rule.v_aa = o->rule.v_aa;
-  //n->rule.c = o->rule.c;
-  //n->rule.v_cat = o->rule.v_cat;
-  //n->rule.l_vals = o->rule.l_vals;
-  //n->rule.r_vals = o->rule.r_vals;
+  n->rule.is_aa = o->rule.is_aa;
+  n->rule.is_cat = o->rule.is_cat;
+  n->rule.v_aa = o->rule.v_aa;
+  n->rule.rc_weight = o->rule.rc_weight;
+  n->rule.c = o->rule.c;
+  n->rule.v_cat = o->rule.v_cat;
+  n->rule.l_vals = o->rule.l_vals;
+  n->rule.r_vals = o->rule.r_vals;
   
   if(o->l){
     // if o has children
@@ -398,4 +431,3 @@ void tree::cp(tree_p n, tree_cp o)
     cp(n->r, o->r);
   }
 }
-
