@@ -1,11 +1,11 @@
 Package: VCBART
 Type: Package
 Title: Fit varying coefficient models with Bayesian Additive Regression Trees
-Version: 1.1
-Date: 2021-04-26
+Version: 1.2
+Date: 2022-08-01
 Author: Sameer K. Deshpande
-Maintainer: Questions and comments to  <sameerd@alum.mit.edu>
+Maintainer: Questions and comments to  <sameer.deshpande@wisc.edu>>
 Description: Uses Bayesian Additive Regression Trees to estimate covariate effect functions in the linear varying coefficient model
-License: GNU GPL v3.0
-Depends: Rcpp (>= 1.0.3), RcppArmadillo
+License: GPL (>= 3)
 LinkingTo: Rcpp, RcppArmadillo
+Imports: Rcpp
