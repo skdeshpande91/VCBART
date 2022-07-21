@@ -90,9 +90,23 @@ P(T) &= \tau^{-2}I_{L(T)} + \sigma^{-2}\sum_{i = 1}^{n}{\bX_{i}(T)^{\top}\Omega_
 Observe that the terms in the first line of Equation~\eqref{eq:lil_joint_density} do not depend on $T$ or $\mu.$
 We will collect these terms into a constant $C,$ where we suppress the dependence on $\sigma^{2}, \bOmega$ and the $\br_{i}$'s from the notation.
 
-Integrating out $\bmu$ from Equation~\eqref{eq:lil_joint_density}, we obtain
+That is, we have
+\begin{align}
+\begin{split}
+\label{eq:lil_joint_density2}
+p(\bY, \bmu \vert T, \bE^{-1}, \sigma^{2}) &= C \times \tau^{-L(T)} \times \exp\left\{-\frac{1}{2}\left[(\bmu - P^{-1}(T)\Theta(T))^{\top}P(T)(\bmu - P^{-1}(T)\Theta(T))\right]\right\} \\
+~&~\times \exp\left\{\frac{1}{2}\left[\Theta(T)^{\top}P^{-1}(T)\Theta(T) - L\mu_{0}^{2}\tau^{-2}\right]\right\}
+\end{split}
+\end{align}
+
+Equation~\eqref{eq:lil_joint_density2} shows that
+$$
+\bmu \vert T, \bY, \bE^{-1}, \sigma^{2} \sim \mathcal{N}(P^{-1}(T)\Theta(T), P^{-1}(T)).
+$$
+
+Further, by integrating out $\bmu$ from the right-hand side of Equation~\eqref{eq:lil_joint_density2}, we compute
 \begin{align*}
-p(\bY \vert T, \bE^{-1}, \sigma^{2}) &= C \times \tau^{-L(T)} \times \exp\left\{\frac{\Theta(T)^{\top}P(T)^{-1}\Theta(T) + L\mu_{0}^{2}\tau^{-2}}{2}\right\}
+p(\bY \vert T, \bE^{-1}, \sigma^{2}) &= C \times \tau^{-L(T)} \times \lvert P(T) \rvert^{-\frac{1}{2}} \times \exp\left\{\frac{\Theta(T)^{\top}P(T)^{-1}\Theta(T) - L\mu_{0}^{2}\tau^{-2}}{2}\right\}
 \end{align*}
 
 \textbf{Computing $P(T)$ in the general case}. Recall that
@@ -158,30 +172,36 @@ $$
 \bX_{i}(T)^{\top}\Omega_{i}\bX_{i}(T) = \frac{1}{1 - \rho}\bX_{i}(T)^{\top}\bX_{i}(T) - \frac{\rho}{(1 - \rho)^{2} + n_{i}\rho(1 - \rho)}\bX_{i}(T)^{\top}\bone_{n_{i}}\bone_{n_{i}}^{\top}\bX_{i}(T) 
 $$
 
-From our computation above, we know that
+%From our computation above, we know that
+%\begin{align*}
+%(\bX_{i}(T)^{\top}\bX_{i}(T))_{\ell,\ell'} &= \sum_{t = 1}^{n_{i}}{x_{itj}^{2}\mathbbm{1}(t \in I_{i}(\ell;T), t \in I_{i}(\ell';T))} \\
+%&= \mathbbm{1}(\ell = \ell') \times \sum_{t \in I_{i}(\ell)}{x_{ijt}^{2}}
+%\end{align*}
+
+Observe that
 \begin{align*}
-(\bX_{i}(T)^{\top}\bX_{i}(T))_{\ell,\ell'} &= \sum_{t = 1}^{n_{i}}{x_{itj}^{2}\mathbbm{1}(t \in I_{i}(\ell;T), t \in I_{i}(\ell';T))} \\
-&= \mathbbm{1}(\ell = \ell') \times \sum_{t \in I_{i}(\ell)}{x_{ijt}^{2}}
+(\bX_{i}(T)^{\top}\bX_{i}(T))_{\ell,\ell'} &= \sum_{t = 1}^{n_{i}}{x_{itj}^{2} \mathbbm{1}(t \in I_{i}(\ell;T), t \in I_{i}(\ell',T))} \\
+~ &= \mathbbm{1}(\ell = \ell') \times \sum_{t \in I_{i}(\ell;T)}{x_{itj}^{2}}
 \end{align*}
 
 We further have
 \begin{align*}
-(\bX_{i}(T)^{\top}\bone_{L(T)})_{\ell} &= \sum_{t \in I_{i}(\ell;T)}{x_{itj}}
+(\bX_{i}(T)^{\top}\bone_{n_{i}})_{\ell} &= \sum_{t \in I_{i}(\ell;T)}{x_{itj}}
 \end{align*}
 Hence
 $$
-(\bX_{i}(T)^{\top}\bone_{L(T)}\bone_{L(T)}^{\top}\bX_{i}(T))_{\ell,\ell'} = \left(\sum_{t \in I_{i}(\ell;T)}{x_{itj}}\right) \times \left(\sum_{t' \in I_{i}(\ell';T)}{x_{it'j}}\right)
+(\bX_{i}(T)^{\top}\bone_{n_{i}}\bone_{n_{i}}^{\top}\bX_{i}(T))_{\ell,\ell'} = \left(\sum_{t \in I_{i}(\ell;T)}{x_{itj}}\right) \times \left(\sum_{t' \in I_{i}(\ell';T)}{x_{it'j}}\right)
 $$
 
 We conclude that
 \begin{align*}
-(P(T))_{\ell,\ell'} &= \mathbbm{1}(\ell = \ell') \times \left[\tau^{-2} + \sigma^{-2}\sum_{i = 1}^{n}{\sum_{t \in I_{i}(\ell)}{x_{itj}^{2}}}\right] \\
+(P(T))_{\ell,\ell'} &= \mathbbm{1}(\ell = \ell') \times \left[\tau^{-2} + \frac{\sigma^{-2}}{1 - \rho} \times \sum_{i = 1}^{n}{\sum_{t \in I_{i}(\ell)}{x_{itj}^{2}}}\right] \\
 &~-\frac{\rho}{1 - \rho} \times \sum_{i = 1}^{n}{\frac{1}{1 - \rho + n_{i}\rho} \times \left(\sum_{t \in I_{i}(\ell;T)}{x_{itj}}\right)\left(\sum_{t' \in I_{i}(\ell';T)}{x_{it'j}}\right)}
 \end{align*}
 
 Turning our attention to $\Theta(T)$, have
 $$
-\bX_{i}(T)^{\top}\Omega_{i}\br_{i} = \frac{1}{1-\rho}\bX_{i}(T)^{\top}\br_{i} - \frac{\rho}{1-\rho} \times \frac{\rho}{1 - \rho + n_{i}\rho} \times \bX_{i}^{\top}\bone_{n_{i}}\bone_{n_{i}}^{\top}\br_{i}
+\bX_{i}(T)^{\top}\Omega_{i}\br_{i} = \frac{1}{1-\rho}\bX_{i}(T)^{\top}\br_{i} - \frac{\rho}{1-\rho} \times \frac{1}{1 - \rho + n_{i}\rho} \times \bX_{i}^{\top}\bone_{n_{i}}\bone_{n_{i}}^{\top}\br_{i}
 $$
 
 Notice that
@@ -195,7 +215,7 @@ $$
 
 We conclude that
 $$
-\Theta(T)_{\ell} = \tau^{-2}\mu_{0} + \frac{\sigma^{-2}}{1 - \rho} \times \sum_{i = 1}^{n}{\sum_{t \in I_{i}(\ell;T)}{\left[x_{itj}r_{it} - \frac{\bone_{n_{i}}^{\top}\br_{i}}{1 - \rho + n_{i}\rho}x_{itj}\right]}}
+\Theta(T)_{\ell} = \tau^{-2}\mu_{0} + \frac{\sigma^{-2}}{1 - \rho} \times \sum_{i = 1}^{n}{\sum_{t \in I_{i}(\ell;T)}{\left[x_{itj}r_{it} - \frac{\rho \times \bone_{n_{i}}^{\top}\br_{i}}{1 - \rho + n_{i}\rho}x_{itj}\right]}}
 $$
 
 
