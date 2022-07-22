@@ -311,7 +311,13 @@ double compute_lil(arma::mat &P, arma::vec &Theta, tree_prior_info &tree_pi)
 {
   // -0.5 * log det P  - L(T) * log(tau) + 0.5 * Theta' P^-1 Theta - 0.5 * L * mu0^2/tau^2
   int L = Theta.size(); // number of leafs
-  arma::vec Pinv_theta = arma::solve(P,Theta); // computes p^-1 * Theta
+  arma::vec Pinv_theta;
+  bool solve_flag = arma::solve(Pinv_theta, P, Theta); // computes p^-1 * Theta;
+  if(!solve_flag){
+    Rcpp::Rcout << "[[compute_lil]]: could not compute P_inv" << std::endl;
+    P.print();
+    Rcpp::stop("Invalid posterior precision matrix for this tree.");
+  }
   double lil = -1.0 * ( (double) L) * log(tree_pi.tau) - 0.5 * pow(tree_pi.mu0, 2.0)/pow(tree_pi.tau, 2.0) * ( (double) L);
   lil += 0.5 * arma::dot(Theta, Pinv_theta);
   lil -= 0.5 * arma::log_det_sympd(P);
@@ -1234,7 +1240,14 @@ void update_sigma_cs(double &sigma, double &rho, double &nu, double &lambda, dat
   double n;
   for(int subj_ix = 0; subj_ix < di.n; subj_ix++){
     n = (double) di.ni[subj_ix];
-    scale_post += di.r2_sum[subj_ix]/(1.0 - rho) - pow(di.r_sum[subj_ix],2)/( (1.0 - rho) * (1.0 + rho * (n - 1.0)));
+    if(di.r2_sum[subj_ix] <= rho * pow(di.r_sum[subj_ix],2)/(1 + rho * (n - 1.0))){
+      Rcpp::Rcout << "[update_sigma_cs]: something is fishy" << std::endl;
+      Rcpp::Rcout << "  subj_ix = " << subj_ix << " r_sum = " << di.r_sum[subj_ix] << " r2_sum = " << di.r2_sum[subj_ix] << std::endl;
+      Rcpp::Rcout << "  first term = " << di.r2_sum[subj_ix] << std::endl;
+      Rcpp::Rcout << "  second term = " << rho * pow(di.r_sum[subj_ix],2)/(1 + rho * (n - 1.0)) << std::endl;
+    }
+    scale_post += di.r2_sum[subj_ix]/(1.0 - rho) - rho * pow(di.r_sum[subj_ix],2)/( (1.0 - rho) * (1.0 + rho * (n - 1.0)));
   }
+  //Rcpp::Rcout << "[update_sigma_cs]: scale_post = " << scale_post << " nu_post = " << nu_post << std::endl;
   sigma = sqrt( scale_post/gen.chi_square(nu_post));
 }

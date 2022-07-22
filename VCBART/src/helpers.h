@@ -413,12 +413,12 @@ inline void parse_training_data(int &N_train, int &n_train, int &p, int &R, int 
 
 }
 
-inline void parse_testing_data(int &N_test, int &n_test, int p, int R_cont, int R_cat, Rcpp::IntegerVector &ni_test, Rcpp::NumericMatrix &tX_test, Rcpp::NumericMatrix &tZ_cont_test, Rcpp::IntegerMatrix &tZ_cat_test)
+inline void parse_testing_data(int &N_test, int p, int R_cont, int R_cat, Rcpp::NumericMatrix &tX_test, Rcpp::NumericMatrix &tZ_cont_test, Rcpp::IntegerMatrix &tZ_cat_test)
 {
   
   if(tX_test.size() > 1){
     // test set data was provided!
-    n_test = ni_test.size();
+    //n_test = ni_test.size();
     N_test = tX_test.cols(); // N_train is nrow(X_train) so it is ncol(t(X_train)). this is total number of observations
     
     // make sure we have the same number of covariates in training & testing sets
@@ -452,6 +452,8 @@ inline void parse_testing_data(int &N_test, int &n_test, int p, int R_cont, int 
         Rcpp::stop("Z_cat_test and X_test must have same number of rows!");
       }
     }
+  } else{
+    N_test = 0;
   } // closes if checking that we have supplied test set covariates.
 }
   

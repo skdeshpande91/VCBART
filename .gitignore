@@ -12,3 +12,4 @@ testing/*
 *.log
 *.out
 *.synctex.gz
+*.Rcheck

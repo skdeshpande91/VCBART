@@ -8,8 +8,6 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
                          Rcpp::NumericMatrix tX_train,
                          Rcpp::NumericMatrix tZ_cont_train,
                          Rcpp::IntegerMatrix tZ_cat_train,
-                         Rcpp::IntegerVector subj_id_test,
-                         Rcpp::IntegerVector ni_test,
                          Rcpp::NumericMatrix tX_test,
                          Rcpp::NumericMatrix tZ_cont_test,
                          Rcpp::IntegerMatrix tZ_cat_test,
@@ -42,16 +40,15 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   int R = 0;
   
   int N_test = 0;
-  int n_test = 0;
   
   parse_training_data(N_train, n_train, p, R, R_cont, R_cat, ni_train, tX_train, tZ_cont_train, tZ_cat_train);
   if(Y_train.size() != N_train) Rcpp::stop("Number of observations in Y_train does not match number of rows in matrix of training X's");
-  parse_testing_data(N_test, n_test, p, R_cont, R_cat, ni_test, tX_test, tZ_cont_test, tZ_cat_test);
+  parse_testing_data(N_test, p, R_cont, R_cat, tX_test, tZ_cont_test, tZ_cat_test);
   
   
   Rcpp::Rcout << " p = " << p << " R_cont = " << R_cont << " R_cat = " << R_cat << std::endl;
   Rcpp::Rcout << "N_train = " << N_train << " n_train = " << n_train << std::endl;
-  Rcpp::Rcout << "N_test = " << N_test << " n_test = " << n_test << std::endl;
+  Rcpp::Rcout << "N_test = " << N_test << std::endl;
   
   std::vector<std::set<double>> cutpoints;
   if(R_cont > 0){
@@ -86,9 +83,14 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   double* r_sum = new double[n_train];
   double* r2_sum = new double[n_train];
   
+  double* tmp_r_sum = new double[n_train];
+  double* tmp_r2_sum = new double[n_train];
+  
   for(int subj_ix = 0; subj_ix < n_train; subj_ix++){
     r_sum[subj_ix] = 0.0;
     r2_sum[subj_ix] = 0.0;
+    tmp_r_sum[subj_ix] = 0.0;
+    tmp_r2_sum[subj_ix] = 0.0;
   }
   
   for(int i = 0; i < N_train; i++){
@@ -113,13 +115,13 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   di_train.r2_sum = r2_sum;
   
   int tmp_N_test = 0;
-  if(n_test > 0) tmp_N_test = N_test;
+  if(N_test > 0) tmp_N_test = N_test;
   else tmp_N_test = 1;
   
   double* allfit_test = new double[tmp_N_test];
   double* beta_fit_test = new double[p*tmp_N_test];
   
-  if(n_test > 0){
+  if(N_test > 0){
     for(int i = 0; i < N_test; i++){
       allfit_test[i] = 0.0;
       for(int j = 0; j < p; j++) beta_fit_test[j + i * p] = 0.0;
@@ -127,15 +129,12 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   }
   
   data_info di_test;
-  if(n_test > 0){
+  if(N_test > 0){
     di_test.N = N_test;
-    di_test.n = n_test;
     di_test.p = p;
     di_test.R = R;
     di_test.R_cont = R_cont;
     di_test.R_cat = R_cat;
-    di_test.subj_id = subj_id_test.begin();
-    di_test.ni = ni_test.begin();
     di_test.x = tX_test.begin();
     if(R_cont > 0) di_test.z_cont = tZ_cont_test.begin();
     if(R_cat > 0) di_test.z_cat = tZ_cat_test.begin();
@@ -216,7 +215,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
         }
       }
       
-      if(n_test > 0){
+      if(N_test > 0){
         tree_traversal(ss_test_vec[j][m], tree_vec[j][m], di_test);
         for(suff_stat_it l_it = ss_test_vec[j][m].begin(); l_it != ss_test_vec[j][m].end(); ++l_it){
           tmp_mu = tree_vec[j][m].get_ptr(l_it->first)->get_mu();
@@ -254,7 +253,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   if(save_samples){
     fit_train.zeros(nd,N_train);
     beta_train.zeros(nd, N_train,p);
-    if(n_test > 0){
+    if(N_test > 0){
       fit_test.zeros(nd,N_test);
       beta_test.zeros(nd, N_test,p);
     }
@@ -281,7 +280,9 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
       }
     }
     
-    if( (iter == burn) && (n_test > 0)){
+    //Rcpp::Rcout << "    rho = " << rho << "  sigma = " << sigma << std::endl;
+    
+    if( (iter == burn) && (N_test > 0)){
       // in first sampling iteration, we should populate allfit_test and beta_fit_test
       for(int j = 0; j < p; j++){
         for(int m = 0; m < M; m++){
@@ -313,13 +314,13 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
             allfit_train[i] -= tX_train(j,i) * tmp_mu;
             residual[i] += tX_train(j,i) * tmp_mu;
             beta_fit_train[j + i*p] -= tmp_mu; // remove fit of m-th tree from overall fit of beta's
-            r_sum[subj_id_train[i]] -= tX_train(j,i) * tmp_mu; // remove contribution to total sum of residuals for subject contributing i-th obs
+            r_sum[subj_id_train[i]] += tX_train(j,i) * tmp_mu; // remove contribution to total sum of residuals for subject contributing i-th obs
             r2_sum[subj_id_train[i]] += 2.0 * tX_train(j,i) * tmp_mu * residual[i] - pow(tX_train(j,i) * tmp_mu, 2);
           } // close loop over obs in single leaf
         } // close loop over all leafs
         
         // if we have testing data & we're post-warmup, then we should remove the value of m-th tree of j-th ensemble from allfit_test and beta_fit_test
-        if(iter >= burn && n_test > 0){
+        if(iter >= burn && N_test > 0){
           for(suff_stat_it l_it = ss_test_vec[j][m].begin(); l_it != ss_test_vec[j][m].end(); ++l_it){
             tmp_mu = tree_vec[j][m].get_ptr(l_it->first)->get_mu();
             for(int_it it = l_it->second.begin(); it != l_it->second.end(); ++it){
@@ -344,7 +345,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
             // numerically this exactly equal to SUBTRACTING X(*it,j) * tmp_mu to residual[*it]
             i = *it;
             r2_sum[subj_id_train[i]] += pow(tX_train(j,i) * tmp_mu, 2) - 2.0 * tX_train(j,i) * tmp_mu * residual[i]; // remember, residual[i] currently holds the PARTIAL residual.
-            r_sum[subj_id_train[i]] += tX_train(j,i) * tmp_mu; // restore contribution to total sum of residuals for subject contributing i-th obs
+            r_sum[subj_id_train[i]] -= tX_train(j,i) * tmp_mu; // restore contribution to total sum of residuals for subject contributing i-th obs
             allfit_train[i] += tX_train(j,i) * tmp_mu;
             residual[i] -= tX_train(j,i) * tmp_mu;
             beta_fit_train[j + i*p] += tmp_mu; // restore fit of m-th tree from overall fit of beta's
@@ -352,7 +353,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
         } // close loop over all leafs
         
         // if we have testing data & we're post-warmup, then we should add back in the value of m-th tree of j-th ensemble to allfit_test and beta_fit_test
-        if(iter >= burn && n_test > 0){
+        if(iter >= burn && N_test > 0){
           for(suff_stat_it l_it = ss_test_vec[j][m].begin(); l_it != ss_test_vec[j][m].end(); ++l_it){
             tmp_mu = tree_vec[j][m].get_ptr(l_it->first)->get_mu();
             for(int_it it = l_it->second.begin(); it != l_it->second.end(); ++it){
@@ -362,6 +363,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
             }
           }
         }
+        
       } // closes loop over trees in j-th ensemble
       
       // now we can update theta
@@ -377,6 +379,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
     update_sigma_cs(sigma, rho, nu, lambda, di_train, gen);
     update_rho(rho, sigma, di_train, gen);
     sigma_samples(iter) = sigma;
+    rho_samples(iter) = rho;
     
     if( (iter >= burn) && ( (iter - burn) % thin == 0)){
       sample_index = (int) ( (iter-burn)/thin);
@@ -404,7 +407,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
           }
         }
         
-        if(n_test > 0){
+        if(N_test > 0){
           for(int i = 0; i < N_test; i++){
             fit_test(sample_index,i) = allfit_test[i];
             fit_test_mean(i) += allfit_test[i];
@@ -421,7 +424,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
             beta_train_mean(i,j) += beta_fit_train[j + i*p];
           }
         }
-        if(n_test > 0){
+        if(N_test > 0){
           for(int i = 0; i < N_test; i++){
             fit_test_mean(i) += allfit_test[i];
             for(int j = 0; j < p; j++){
@@ -435,7 +438,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   
   fit_train_mean /= ( (double) nd);
   beta_train_mean /= ( (double) nd);
-  if(n_test > 0){
+  if(N_test > 0){
     fit_test_mean /= ( (double) nd);
     beta_test_mean /= ( (double) nd);
   }
@@ -447,7 +450,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
     results["fit_train"] = fit_train;
     results["beta_train"] = beta_train;
   }
-  if(n_test > 0){
+  if(N_test > 0){
     results["fit_test_mean"] = fit_test_mean;
     results["beta_test_mean"] = beta_test_mean;
     if(save_samples){

@@ -1,7 +1,7 @@
 export("VCBART_ind")
 export("VCBART_cs")
-export("get_beta_support")
 export("summarize_beta")
-importFrom(Rcpp, evalCpp)
+importFrom("Rcpp", "evalCpp")
+importFrom("stats", "quantile")
 useDynLib(VCBART)
 
