@@ -1,6 +1,6 @@
 Package: VCBART
 Type: Package
-Title: Fit varying coefficient models with Bayesian Additive Regression Trees
+Title: Fit Varying Coefficient Models with Bayesian Additive Regression Trees
 Version: 1.2
 Date: 2022-08-01
 Author: Sameer K. Deshpande

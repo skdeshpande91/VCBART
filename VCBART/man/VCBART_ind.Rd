@@ -48,7 +48,12 @@ VCBART_ind(Y_train,subj_id_train, ni_train,X_train,
   \item{print_every}{As the MCMC runs, a message is printed every \code{print_every} iterations. Default is \code{floor( (nd*thin + burn)/10)} so that only 10 messages are printed.}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Given p covariates X1, ..., Xp and r modifiers Z1, ..., Zr, the varying coefficient model asserts that
+
+E[Y | X = x, Z = ] = beta_0(z) + beta_1(z) * x1 + ... beta_p(z) * xp.
+
+That is, for any r-vector z, the relationships between X and Y is linear. However, the specific relationship is allowed to vary across z's.
+VCBART attempts to learn the covariate effect functions beta_0(*) ... beta_p(*) using ensembles of regression trees.
 }
 \value{A list containing
 \item{y_mean}{Mean of the training observations (needed by \code{predict_VCBART})}

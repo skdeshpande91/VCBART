@@ -2,6 +2,7 @@
 # Used for the main simulation studies
 #library(VCBARTdev)
 library(VCBART)
+
 vcbart_wrapper <- function(Y_train, 
                            X_train, Z_train, n_train,
                            X_test, Z_test, n_test,
