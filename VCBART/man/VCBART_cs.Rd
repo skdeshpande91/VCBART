@@ -20,6 +20,7 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
           sparse = TRUE,
           rho = 0.9,
           M = 200,
+          mu0 = NULL, tau = NULL, nu = NULL, lambda = NULL,
           nd = 1000, burn = 1000, thin = 1,
           save_samples = TRUE, save_trees = TRUE,
           verbose = TRUE, print_every = floor( (nd*thin + burn)/10))
@@ -42,6 +43,10 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
   \item{sparse}{Logical, indicating whether or not to perform variable selection in each tree ensemble based on a sparse Dirichlet prior rather than uniform prior; see Linero 2018. Default is \code{TRUE}}
   \item{rho}{Initial auto-correlation parameter for compound symmetry error structure. Must be between 0 and 1. Default is 0.9.}
   \item{M}{Number of trees in each ensemble. Default is 200.}
+  \item{mu0}{Prior mean for jumps/leaf parameters. Default is 0 for each beta function. If supplied, must be a vector of length \code{1 + ncol(X_train)}.}
+  \item{tau}{Prior standard deviation for jumps/leaf parameters. Default is \code{1/sqrt(M)} for each beta function. If supplied, must be a vector of length \code{1 + ncol(X_train)}.}
+  \item{nu}{Degrees of freedom for scaled-inverse chi-square prior on sigma^2. Default is 3.}
+  \item{lambda}{Scale hyperparameter for scaled-inverse chi-square prior on sigma^2. Default places 90\% prior probability that sigma is less than \code{sd(Y_train)}.}
   \item{nd}{Number of posterior draws to return. Default is 1000.}
   \item{burn}{Number of MCMC iterations to be treated as "warmup" or "burn-in". Default is 1000.}
   \item{thin}{Number of post-warmup MCMC iteration by which to thin. Default is 1.}

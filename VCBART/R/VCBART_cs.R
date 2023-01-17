@@ -11,6 +11,7 @@ VCBART_cs <- function(Y_train,
                       sparse = TRUE, 
                       rho = 0.9,
                       M = 200,
+                      mu0 = NULL, tau = NULL, nu = NULL, lambda = NULL,
                       nd = 1000, burn = 1000, thin = 1,
                       save_samples = TRUE, save_trees = TRUE,
                       verbose = TRUE, print_every = floor( (nd*thin + burn)/10))
@@ -57,10 +58,14 @@ VCBART_cs <- function(Y_train,
   }
   
   # Set some hyperparameters
-  mu0 <- rep(0, times = ncol(std_X_train))
-  tau <- rep(1/sqrt(M), times = ncol(std_X_train))
-  nu <- 3
-  lambda <- stats::qchisq(0.1, df = nu)/nu
+  if(is.null(mu0)) mu0 <- rep(0, times = ncol(std_X_train))
+  else if(length(mu0) != ncol(std_X_train)) stop("mu0 needs to have length 1 + ncol(X_train)")
+  
+  if(is.null(tau)) tau <- rep(1/sqrt(M), times = ncol(std_X_train))
+  else if(length(tau) != ncol(std_X_train)) stop("tau needs to have length 1 + ncol(X_train)")
+  
+  if(is.null(nu)) nu <- 3
+  if(is.null(lambda)) lambda <- stats::qchisq(0.1, df = nu)/nu
   
   # hyperparameters for the Dirichlet prior on splitting probs
   a_u <- 0.5
