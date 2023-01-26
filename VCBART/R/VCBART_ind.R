@@ -133,6 +133,7 @@ VCBART_ind <- function(Y_train,
   }
   results[["sigma"]] <- y_sd * fit$sigma
   results[["varcounts"]] <- fit$var_count
+  if(sparse) results[["theta"]] <- fit$theta
   if(save_trees) results[["trees"]] <- fit$trees
   return(results)
 }

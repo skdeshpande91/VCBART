@@ -371,10 +371,17 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
         update_theta_u(theta[j], u[j], var_count[j], R, a_u, b_u, gen);
         for(int r = 0; r < R; r++){
           theta_samples(iter,r,j) = theta[j][r];
-          var_count_samples(iter,r,j) = var_count[j][r];
+          //var_count_samples(iter,r,j) = var_count[j][r];
         }
       }
     } // closes loop over j-th ensemble
+    
+    // update var_count_samples
+    for(int j = 0; j < p; j++){
+      for(int r = 0; r < R; r++){
+        var_count_samples(iter, r, j) = var_count[j][r];
+      }
+    }
     
     update_sigma_cs(sigma, rho, nu, lambda, di_train, gen);
     update_rho(rho, sigma, di_train, gen);

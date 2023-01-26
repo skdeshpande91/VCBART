@@ -75,6 +75,7 @@ VCBART attempts to learn the covariate effect functions beta_0(*) ... beta_p(*) 
 \item{betahat.test}{Array of size \code{nd} x \code{nrow(X_test)} x \code{ncol(X_test)+1} containing posterior samples of evaluations of the coefficient functions. The first dimension corresponds to posterior samples/MCMC iterations, the second dimension corresponds to individual training set observations, and the third dimension corresponds to coefficient functions. Only returned if \code{save_samples == TRUE}.}
 \item{sigma}{Vector containing ALL samples of the residual standard deviation, including warmup.}
 \item{varcounts}{Array of size \code{nd} x R x \code{ncol(X)+1} that counts the number of times a variable was used in a decision rule in each posterior sample of each ensemble. Here R is the total number of potential modifiers (i.e. \code{R = ncol(Z_cont_train) + ncol(Z_cat_train)}).}
+\item{theta}{If \code{sparse=TRUE}, an array of size \code{nd} x R \code{ncol(X)+1} containing samples of the variable splitting probabilities.}
 \item{trees}{A list (of length \code{nd}) of lists (of length \code{ncol(X_train)+1}) of character vectors (of length \code{M}) containing textual representations of the regression trees. The string for the s-th sample of the m-th tree in the j-th ensemble is contaiend in \code{trees[[s]][[j]][m]}. These strings are parsed by \code{predict_VCBART} to reconstruct the C++ representations of the sampled trees.}
 }
 \examples{
