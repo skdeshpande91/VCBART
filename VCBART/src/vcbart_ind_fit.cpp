@@ -45,12 +45,11 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   //parse_testing_data(N_test, n_test, p, R_cont, R_cat, ni_test, tX_test, tZ_cont_test, tZ_cat_test);
   parse_testing_data(N_test, p, R_cont, R_cat, tX_test, tZ_cont_test, tZ_cat_test);
   
-  
-  Rcpp::Rcout << " p = " << p << " R_cont = " << R_cont << " R_cat = " << R_cat << std::endl;
-  Rcpp::Rcout << "N_train = " << N_train << " n_train = " << n_train << std::endl;
-  //Rcpp::Rcout << "N_test = " << N_test << " n_test = " << n_test << std::endl;
-  Rcpp::Rcout << "N_test = " << N_test << std::endl;
-  
+  if(verbose){
+    Rcpp::Rcout << " p = " << p << " R_cont = " << R_cont << " R_cat = " << R_cat << std::endl;
+    Rcpp::Rcout << "N_train = " << N_train << " n_train = " << n_train << std::endl;
+    Rcpp::Rcout << "N_test = " << N_test << std::endl;
+  }
   std::vector<std::set<double>> cutpoints;
   if(R_cont > 0){
     if(cutpoints_list.isNotNull()){
@@ -382,12 +381,14 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
             Rcpp::Rcout << "iter = " << iter << " j = " << j << " m = " << m << std::endl;
             Rcpp::Rcout << "subj_ix = " << subj_ix << " r_sum = " << r_sum[subj_ix] << std::endl;
             Rcpp::Rcout << " actual sum of residuals = " << tmp_r_sum[subj_ix] << std::endl;
+            Rcpp::Rcout << "  difference = " << r_sum[subj_ix] - tmp_r_sum[subj_ix] << std::endl;
             Rcpp::stop("Mistake in sum of residuals");
           }
           if(abs(r2_sum[subj_ix] - tmp_r2_sum[subj_ix]) > 1e-12){
             Rcpp::Rcout << "iter = " << iter << " j = " << j << " m = " << m << std::endl;
             Rcpp::Rcout << "subj_ix = " << subj_ix << " r2_sum = " << r2_sum[subj_ix] << std::endl;
             Rcpp::Rcout << " actual sum of squared residuals = " << tmp_r2_sum[subj_ix] << std::endl;
+            Rcpp::Rcout << "  difference = " << r2_sum[subj_ix] - tmp_r2_sum[subj_ix] << std::endl;
             Rcpp::stop("Mistake in sum of squared residuals");
           }
         }
