@@ -45,7 +45,7 @@ Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train,
   if(Y_train.size() != N_train) Rcpp::stop("Number of observations in Y_train does not match number of rows in matrix of training X's");
   parse_testing_data(N_test, p, R_cont, R_cat, tX_test, tZ_cont_test, tZ_cat_test);
   
-  if(verobse){
+  if(verbose){
     Rcpp::Rcout << " p = " << p << " R_cont = " << R_cont << " R_cat = " << R_cat << std::endl;
     Rcpp::Rcout << "N_train = " << N_train << " n_train = " << n_train << std::endl;
     Rcpp::Rcout << "N_test = " << N_test << std::endl;
