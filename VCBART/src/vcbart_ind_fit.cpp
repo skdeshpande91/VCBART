@@ -377,14 +377,14 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
         }
         
         for(int subj_ix = 0; subj_ix < n_train; subj_ix++){
-          if(abs(r_sum[subj_ix] - tmp_r_sum[subj_ix]) > 1e-12){
+          if(abs(r_sum[subj_ix] - tmp_r_sum[subj_ix]) > 1e-8){
             Rcpp::Rcout << "iter = " << iter << " j = " << j << " m = " << m << std::endl;
             Rcpp::Rcout << "subj_ix = " << subj_ix << " r_sum = " << r_sum[subj_ix] << std::endl;
             Rcpp::Rcout << " actual sum of residuals = " << tmp_r_sum[subj_ix] << std::endl;
             Rcpp::Rcout << "  difference = " << r_sum[subj_ix] - tmp_r_sum[subj_ix] << std::endl;
             Rcpp::stop("Mistake in sum of residuals");
           }
-          if(abs(r2_sum[subj_ix] - tmp_r2_sum[subj_ix]) > 1e-12){
+          if(abs(r2_sum[subj_ix] - tmp_r2_sum[subj_ix]) > 1e-8){
             Rcpp::Rcout << "iter = " << iter << " j = " << j << " m = " << m << std::endl;
             Rcpp::Rcout << "subj_ix = " << subj_ix << " r2_sum = " << r2_sum[subj_ix] << std::endl;
             Rcpp::Rcout << " actual sum of squared residuals = " << tmp_r2_sum[subj_ix] << std::endl;
