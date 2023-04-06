@@ -57,7 +57,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
       parse_cutpoints(cutpoints, R_cont, tmp_cutpoints, unif_cuts);
     }
   }
-  
+  if(verbose) Rcpp::Rcout << "parsed cutpoints" << std::endl;
   std::vector<std::set<int>> cat_levels;
   std::vector<int> K;
   std::vector<std::vector<edge>> edges;
@@ -75,6 +75,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
       parse_graphs(edges, R_cat, K, tmp_edge_mat, graph_split);
     }
   }
+  if(verbose) Rcpp::Rcout << "parse cutpoints and graphs and cat levels" << std::endl;
   
   double* allfit_train = new double[N_train]; // holds fit of regression function
   double* beta_fit_train = new double[p*N_train]; // holds fit of each coefficient function. beta_fit_train[j + i * p] is for obs i coefficient j
@@ -97,6 +98,10 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
     for(int j = 0; j < p; j++) beta_fit_train[j + i*p] = 0.0;
   }
   
+  if(verbose){
+    Rcpp::Rcout << "Set up allfit_train" << std::endl;
+  }
+  
   data_info di_train;
   di_train.N = N_train;
   di_train.n = n_train;
@@ -113,6 +118,10 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   di_train.r_sum = r_sum;
   di_train.r2_sum = r2_sum;
   
+  if(verbose){
+    Rcpp::Rcout << "Set up di_train" << std::endl;
+  }
+  
   int tmp_N_test = 0;
   if(N_test > 0) tmp_N_test = N_test;
   else tmp_N_test = 1;
@@ -126,7 +135,9 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
       for(int j = 0; j < p; j++) beta_fit_test[j + i * p] = 0.0;
     }
   }
-  
+  if(verbose){
+    Rcpp::Rcout << "Set up allfit_test" << std::endl;
+  }
   data_info di_test;
   if(N_test > 0){
     di_test.N = N_test;
@@ -141,7 +152,9 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
     if(R_cont > 0) di_test.z_cont = tZ_cont_test.begin();
     if(R_cat > 0) di_test.z_cat = tZ_cat_test.begin();
   }
-  
+  if(verbose){
+    Rcpp::Rcout << "set up di_test" << std::endl;
+  }
   // declare stuff for variable selection
   std::vector<std::vector<double>> theta(p, std::vector<double>(R, 1.0/( (double) R)));
   double* u = new double[p];
@@ -202,7 +215,11 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   std::vector<std::vector<tree>> tree_vec(p, std::vector<tree>(M));
   std::vector<std::vector<suff_stat>> ss_train_vec(p, std::vector<suff_stat>(M));
   std::vector<std::vector<suff_stat>> ss_test_vec(p, std::vector<suff_stat>(M));
+  
+  if(verbose) Rcpp::Rcout << "Starting initial tree traversals" << std::endl;
+  
   for(int j = 0; j < p; j++){
+    Rcpp::Rcout << "j = " << std::endl;
     for(int m = 0; m < M; m++){
       tree_traversal(ss_train_vec[j][m], tree_vec[j][m], di_train);
       
@@ -228,6 +245,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
       }
     }
   }
+  if(verbose) Rcpp::Rcout << "Finished initial tree traversal" << std::endl;
 
   for(int i = 0; i < N_train; i++){
     residual[i] = Y_train[i] - allfit_train[i];
@@ -266,6 +284,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   
   Rcpp::List tree_draws(nd);
   
+  Rcpp::Rcout << "Ready for MCMC" << std::endl;
 
   // main MCMC loop starts here!
   for(int iter = 0; iter < total_draws; iter++){
