@@ -407,6 +407,8 @@ inline void parse_training_data(int &N_train, int &n_train, int &p, int &R, int 
       Rcpp::stop("Z_cont_train, Z_cat_train, and X_train must have same number of rows!");
     }
   } else{
+    Rcpp::Rcout << "Z_cont_train has " << tZ_cont_train.cols() << " rows" << std::endl;
+    Rcpp::Rcout << "Z_cat_train has " << tZ_cat_train.cols() << " rows" << std::endl;
     Rcpp::stop("No continuous or categorical modifiers are available!");
   }
   R = R_cont + R_cat;

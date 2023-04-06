@@ -71,6 +71,7 @@ VCBART_ind <- function(Y_train,
   a_u <- 0.5
   b_u <- 1
   
+ 
   fit <- .vcbart_ind_fit(Y_train = std_Y_train,
                          subj_id_train = subj_id_train-1, # remember C++ is 0-indexed
                          ni_train = ni_train,
