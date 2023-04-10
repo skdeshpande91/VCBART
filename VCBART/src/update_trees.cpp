@@ -65,13 +65,15 @@ void grow_tree_ind(tree &t, int &accept, int &j, double &sigma, suff_stat &ss_tr
   arma::vec orig_Theta = arma::zeros<arma::mat>(ss_train.size());
   compute_p_theta_ind(j, orig_P, orig_Theta, orig_leaf_map, ss_train, sigma, di_train, tree_pi);
   
+  
   // compute P & Theta for the new tree
   std::map<int, int> prop_leaf_map;
   arma::mat prop_P = arma::zeros<arma::mat>(prop_ss_train.size(), prop_ss_train.size());
   arma::vec prop_Theta = arma::zeros<arma::vec>(prop_ss_train.size());
   compute_p_theta_ind(j, prop_P, prop_Theta, prop_leaf_map, prop_ss_train, sigma, di_train, tree_pi);
-  
+
   double orig_lil = compute_lil(orig_P, orig_Theta, tree_pi);
+  
   double prop_lil = compute_lil(prop_P, prop_Theta, tree_pi);
   
   double log_like_ratio = prop_lil - orig_lil;
@@ -84,7 +86,7 @@ void grow_tree_ind(tree &t, int &accept, int &j, double &sigma, suff_stat &ss_tr
     if(rule.is_aa && !rule.is_cat){
       ++(tree_pi.var_count->at(rule.v_aa));
     } else if(!rule.is_aa && rule.is_cat){
-      int v_raw = rule.v_cat + di_train.R_cat;
+      int v_raw = rule.v_cat + di_train.R_cont;
       ++(tree_pi.var_count->at(v_raw));
     } else if(!rule.is_aa && !rule.is_cat){
       ++(*tree_pi.rc_rule_count);
@@ -95,7 +97,6 @@ void grow_tree_ind(tree &t, int &accept, int &j, double &sigma, suff_stat &ss_tr
       // we really should never hit this
       Rcpp::stop("[grow_tree_ind]: after accepting a GROW move, we cannot resolve rule type!");
     } // closes if/else about what type of rule we accepted
-    
     // we now are ready to update ss, the sufficiant statistic map
     suff_stat_it nxl_it = prop_ss_train.find(nxl_nid); // iterator at element for nxl in the proposed suff_stat_map
     suff_stat_it nxr_it = prop_ss_train.find(nxr_nid); // iterator at element for nxr in the proposed suff_stat_map
@@ -365,7 +366,7 @@ void grow_tree_cs(tree &t, int &accept, int &j, double &rho, double &sigma, suff
     if(rule.is_aa && !rule.is_cat){
       ++(tree_pi.var_count->at(rule.v_aa));
     } else if(!rule.is_aa && rule.is_cat){
-      int v_raw = rule.v_cat + di_train.R_cat;
+      int v_raw = rule.v_cat + di_train.R_cont;
       ++(tree_pi.var_count->at(v_raw));
     } else if(!rule.is_aa && !rule.is_cat){
       ++(*tree_pi.rc_rule_count);

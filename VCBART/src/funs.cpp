@@ -432,7 +432,6 @@ void draw_rule(rule_t &rule, tree &t, int &nid, data_info &di, tree_prior_info &
       
       rule.l_vals.clear();
       rule.r_vals.clear();
-      
       if(tree_pi.graph_split[rule.v_cat] == 1 && tree_pi.edges->at(rule.v_cat).size() > 0){
         // if we explicitly say to use the graph to split the variables
         //graph_partition(avail_levels, rule.l_vals, rule.r_vals, di.adj_support->at(rule.v_cat), di.K->at(rule.v_cat), tree_pi.graph_cut_type, gen);
