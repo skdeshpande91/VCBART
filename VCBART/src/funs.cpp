@@ -196,6 +196,13 @@ void compute_p_theta_ind(int &j, arma::mat &P, arma::vec &Theta, std::map<int,in
     for(int_it it = l_it->second.begin(); it != l_it->second.end(); ++it){
       // we need the sum of all x_itj's for this leaf
       i = *it;
+      if(di.x[j + i*di.p] != di.x[j+i*di.p]){
+        Rcpp::Rcout << " i = " << i << " j = " << j << " X[i,j] is nan!" << std::endl;
+      }
+      if(di.rp[i] != di.rp[i]){
+        Rcpp::Rcout << "i = " << i << "di.rp[i] is nan!" << std::endl;
+      }
+      
       P(l,l) += 1.0/pow(sigma, 2.0) * pow(di.x[j + i * di.p], 2.0);
       Theta(l) += 1.0/pow(sigma, 2.0) * di.x[j + i * di.p] * di.rp[i];
     }
@@ -1232,6 +1239,8 @@ void update_sigma_ind(double &sigma, double &nu, double &lambda, data_info &di, 
   for(int subj_ix = 0; subj_ix < di.n; subj_ix++) scale_post += di.r2_sum[subj_ix]; // add sum of squared residual for each subject
   sigma = sqrt( scale_post/gen.chi_square(nu_post));
 }
+
+
 void update_sigma_cs(double &sigma, double &rho, double &nu, double &lambda, data_info &di, RNG &gen)
 {
   double scale_post = lambda * nu;

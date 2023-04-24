@@ -96,7 +96,7 @@ VCBART_ind <- function(Y_train,
                          save_samples = save_samples, save_trees = save_trees,
                          verbose = verbose, print_every = print_every)
   
-  sigma_samples <- y_sd * fit$sigma_samples
+  sigma_samples <- y_sd * fit$sigma
   
   yhat_train_mean <- y_mean + y_sd * fit$fit_train_mean
   beta_train_mean <- rescale_beta_mean(fit$beta_train_mean, y_mean, y_sd, x_mean, x_sd)
