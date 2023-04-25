@@ -274,11 +274,16 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   // main MCMC loop starts here!
   for(int iter = 0; iter < total_draws; iter++){
     if(verbose){
+      // remember that R is 1-indexed
       if( (iter < burn) && (iter % print_every == 0)){
         Rcpp::Rcout << "  MCMC Iteration: " << iter << " of " << total_draws << "; Warmup" << std::endl;
         Rcpp::checkUserInterrupt();
-      } else if(( (iter > burn) && (iter%print_every == 0)) || (iter == burn)){
+      } else if(((iter> burn) && (iter%print_every == 0)) || (iter == burn) ){
         Rcpp::Rcout << "  MCMC Iteration: " << iter << " of " << total_draws << "; Sampling" << std::endl;
+        Rcpp::checkUserInterrupt();
+      } else if( iter == total_draws-1){
+        Rcpp::Rcout << "  MCMC Iteration: " << iter+1 << " of " << total_draws << "; Sampling" << std::endl;
+        Rcpp::checkUserInterrupt();
       }
     }
     
@@ -369,6 +374,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
         
         // at this point, we're done updating a single tree.
         // let's check what the sum of the residuals are
+        /*
         for(int subj_ix = 0; subj_ix < n_train; subj_ix++){
           tmp_r_sum[subj_ix] = 0.0;
           tmp_r2_sum[subj_ix] = 0.0;
@@ -395,6 +401,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
             Rcpp::stop("Mistake in sum of squared residuals");
           }
         }
+        */
       } // closes loop over trees in j-th ensemble
       
       // now we can update theta
