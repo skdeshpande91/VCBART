@@ -17,6 +17,8 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
           unif_cuts = rep(TRUE, times = ncol(Z_cont_train)),
           cutpoints_list = NULL,
           cat_levels_list = NULL,
+          edge_mat_list = NULL,
+          graph_split = rep(FALSE, times = ncol(Z_cat_train)),
           sparse = TRUE,
           rho = 0.9,
           M = 200,
@@ -40,6 +42,8 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
   \item{unif_cuts}{Vector of logical values indicating whether cutpoints for each continuous modifier should be drawn from a continuous uniform distribution (\code{TRUE}) or a discrete set (\code{FALSE}) specified in \code{cutpoints_list}. Default is \code{TRUE} for each variable in \code{Z_cont_train}}
   \item{cutpoints_list}{List of length \code{ncol(Z_cont_train)} containing a vector of cutpoints for each continuous modifier. By default, this is set to \code{NULL} so that cutpoints are drawn uniformly from a continuous distribution.}
   \item{cat_levels_list}{List of length \code{ncol(Z_cat_train)} containing a vector of levels for each categorical modifier. If the j-th categorical modifier contains L levels, \code{cat_levels_list[[j]]} should be the vector \code{0:(L-1)}. Default is \code{NULL}, which corresponds to the case that no categorical modifiers are available.}
+    \item{edge_mat_list}{List of adjacency matrices if any of the categorical modifiers are network-structured. Default is \code{NULL}, which corresponds to the case that there are no network-structured categorical modifiers.}
+  \item{graph_split}{Vector of logicals indicating whether each categorical modifier is network-structured. Default is \code{rep(FALSE, times = ncol(Z_cat_train))}.}
   \item{sparse}{Logical, indicating whether or not to perform variable selection in each tree ensemble based on a sparse Dirichlet prior rather than uniform prior; see Linero 2018. Default is \code{TRUE}}
   \item{rho}{Initial auto-correlation parameter for compound symmetry error structure. Must be between 0 and 1. Default is 0.9.}
   \item{M}{Number of trees in each ensemble. Default is 200.}

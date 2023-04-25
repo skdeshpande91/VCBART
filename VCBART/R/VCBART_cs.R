@@ -8,6 +8,8 @@ VCBART_cs <- function(Y_train,
                       unif_cuts = rep(TRUE, times = ncol(Z_cont_train)),
                       cutpoints_list = NULL,
                       cat_levels_list = NULL,
+                      edge_mat_list = NULL,
+                      graph_split = rep(FALSE, times = ncol(Z_cat_train)),
                       sparse = TRUE, 
                       rho = 0.9,
                       M = 200,
@@ -59,9 +61,12 @@ VCBART_cs <- function(Y_train,
   
   # Set some hyperparameters
   if(is.null(mu0)) mu0 <- rep(0, times = ncol(std_X_train))
-  else if(length(mu0) != ncol(std_X_train)) stop("mu0 needs to have length 1 + ncol(X_train)")
+  else if(length(mu0) != ncol(std_X_train)){
+    print(mu0)
+    stop("mu0 needs to have length 1 + ncol(X_train)")
+  } 
   
-  if(is.null(tau)) tau <- rep(1/sqrt(M), times = ncol(std_X_train))
+  if(is.null(tau)) tau <- rep(0.5/sqrt(M), times = ncol(std_X_train))
   else if(length(tau) != ncol(std_X_train)) stop("tau needs to have length 1 + ncol(X_train)")
   
   if(is.null(nu)) nu <- 3
@@ -84,9 +89,9 @@ VCBART_cs <- function(Y_train,
                         unif_cuts = unif_cuts,
                         cutpoints_list = cutpoints_list,
                         cat_levels_list = cat_levels_list,
-                        edge_mat_list = NULL,
-                        graph_split = rep(FALSE, times = ncol(Z_cat_train)),
-                        graph_cut_type = 0,
+                        edge_mat_list = edge_mat_list,
+                        graph_split = graph_split,
+                        graph_cut_type = 0, # hardcoded
                         rc_split = FALSE, prob_rc = 0, a_rc = 1, b_rc = 1,
                         sparse = sparse, a_u = a_u, b_u = b_u,
                         mu0 = mu0, tau = tau,
