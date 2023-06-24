@@ -269,7 +269,6 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   
   Rcpp::List tree_draws(nd);
   
-  Rcpp::Rcout << "Ready for MCMC" << std::endl;
 
   // main MCMC loop starts here!
   for(int iter = 0; iter < total_draws; iter++){
