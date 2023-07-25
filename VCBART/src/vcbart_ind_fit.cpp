@@ -83,8 +83,6 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
   double* r2_sum = new double[n_train];
   
   
-  double* tmp_r_sum = new double[n_train];
-  double* tmp_r2_sum = new double[n_train];
   	
   for(int subj_ix = 0; subj_ix < n_train; subj_ix++){
     r_sum[subj_ix] = 0.0;
