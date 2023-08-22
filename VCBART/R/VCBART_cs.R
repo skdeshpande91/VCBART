@@ -121,6 +121,7 @@ VCBART_cs <- function(Y_train,
   
   results <- list()
   results[["y_mean"]] <- y_mean
+  results[["y_sd"]] <- y_sd
   results[["x_mean"]] <- x_mean
   results[["x_sd"]] <- x_sd
   results[["yhat.train.mean"]] <- yhat_train_mean

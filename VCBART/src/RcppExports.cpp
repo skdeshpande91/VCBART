@@ -11,6 +11,21 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// predict_vcbart
+arma::cube predict_vcbart(Rcpp::List tree_draws, int p, Rcpp::NumericMatrix tZ_cont, Rcpp::IntegerMatrix tZ_cat, bool verbose);
+RcppExport SEXP _VCBART_predict_vcbart(SEXP tree_drawsSEXP, SEXP pSEXP, SEXP tZ_contSEXP, SEXP tZ_catSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type tree_draws(tree_drawsSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tZ_cont(tZ_contSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type tZ_cat(tZ_catSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(predict_vcbart(tree_draws, p, tZ_cont, tZ_cat, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rescale_beta_mean
 arma::mat rescale_beta_mean(arma::mat beta_input, double y_mean, double y_sd, Rcpp::NumericVector x_mean, Rcpp::NumericVector x_sd);
 RcppExport SEXP _VCBART_rescale_beta_mean(SEXP beta_inputSEXP, SEXP y_meanSEXP, SEXP y_sdSEXP, SEXP x_meanSEXP, SEXP x_sdSEXP) {
@@ -132,6 +147,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_VCBART_predict_vcbart", (DL_FUNC) &_VCBART_predict_vcbart, 5},
     {"_VCBART_rescale_beta_mean", (DL_FUNC) &_VCBART_rescale_beta_mean, 5},
     {"_VCBART_rescale_beta", (DL_FUNC) &_VCBART_rescale_beta, 5},
     {"_VCBART_vcbart_cs_fit", (DL_FUNC) &_VCBART_vcbart_cs_fit, 35},

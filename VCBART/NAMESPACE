@@ -1,6 +1,7 @@
 export("VCBART_ind")
 export("VCBART_cs")
 export("summarize_beta")
+export("predict_betas")
 importFrom("Rcpp", "evalCpp")
 importFrom("stats", "quantile")
 useDynLib(VCBART)
