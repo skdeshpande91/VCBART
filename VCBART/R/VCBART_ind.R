@@ -11,7 +11,7 @@ VCBART_ind <- function(Y_train,
                        edge_mat_list = NULL,
                        graph_split = rep(FALSE, times = ncol(Z_cat_train)),
                        sparse = TRUE, 
-                       M = 200,
+                       M = 50,
                        mu0 = NULL, tau = NULL, nu = NULL, lambda = NULL,
                        nd = 1000, burn = 1000, thin = 1,
                        save_samples = TRUE, save_trees = TRUE,
@@ -63,7 +63,7 @@ VCBART_ind <- function(Y_train,
   if(is.null(mu0)) mu0 <- rep(0, times = ncol(std_X_train))
   else if(length(mu0) != ncol(std_X_train)) stop("mu0 needs to have length 1 + ncol(X_train)")
   
-  if(is.null(tau)) tau <- rep(1/sqrt(M), times = ncol(std_X_train))
+  if(is.null(tau)) tau <- rep(0.5/sqrt(M), times = ncol(std_X_train))
   else if(length(tau) != ncol(std_X_train)) stop("tau needs to have length 1 + ncol(X_train)")
   
   if(is.null(nu)) nu <- 3

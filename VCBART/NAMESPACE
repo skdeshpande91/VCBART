@@ -4,5 +4,6 @@ export("summarize_beta")
 export("predict_betas")
 importFrom("Rcpp", "evalCpp")
 importFrom("stats", "quantile")
+importFrom("MASS", "mvrnorm")
 useDynLib(VCBART)
 

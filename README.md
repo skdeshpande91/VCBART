@@ -29,4 +29,3 @@ The directory `paper_examples` contains code to reproduce all figures from our p
 It further contains code for a single replication of our synthetic simulation study; to reproduce the entire simulation study, one would need to run that code repeatedly.
 Finally, it contains code used to pre-process and analyze the HRS dataset and the Philadelphia crime data.
 
-

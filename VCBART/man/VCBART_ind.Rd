@@ -20,7 +20,7 @@ VCBART_ind(Y_train,subj_id_train, ni_train,X_train,
            edge_mat_list = NULL,
            graph_split = rep(FALSE, times = ncol(Z_cat_train)),
            sparse = TRUE,
-           M = 200,
+           M = 50,
            mu0 = NULL, tau = NULL, nu = NULL, lambda = NULL,
            nd = 1000, burn = 1000, thin = 1,
            save_samples = TRUE, save_trees = TRUE,
@@ -43,7 +43,7 @@ VCBART_ind(Y_train,subj_id_train, ni_train,X_train,
   \item{edge_mat_list}{List of adjacency matrices if any of the categorical modifiers are network-structured. Default is \code{NULL}, which corresponds to the case that there are no network-structured categorical modifiers.}
   \item{graph_split}{Vector of logicals indicating whether each categorical modifier is network-structured. Default is \code{rep(FALSE, times = ncol(Z_cat_train))}.}
   \item{sparse}{Logical, indicating whether or not to perform variable selection in each tree ensemble based on a sparse Dirichlet prior rather than uniform prior; see Linero 2018. Default is \code{TRUE}}
-  \item{M}{Number of trees in each ensemble. Default is 200.}
+  \item{M}{Number of trees in each ensemble. Default is 50.}
   \item{mu0}{Prior mean for jumps/leaf parameters. Default is 0 for each beta function. If supplied, must be a vector of length \code{1 + ncol(X_train)}.}
   \item{tau}{Prior standard deviation for jumps/leaf parameters. Default is \code{1/sqrt(M)} for each beta function. If supplied, must be a vector of length \code{1 + ncol(X_train)}.}
   \item{nu}{Degrees of freedom for scaled-inverse chi-square prior on sigma^2. Default is 3.}
@@ -63,6 +63,7 @@ E[Y | X = x, Z = ] = beta_0(z) + beta_1(z) * x1 + ... beta_p(z) * xp.
 
 That is, for any r-vector z, the relationships between X and Y is linear. However, the specific relationship is allowed to vary across z's.
 VCBART attempts to learn the covariate effect functions beta_0(*) ... beta_p(*) using ensembles of regression trees.
+This function assumes that the within-subject errors are independent.
 }
 \value{A list containing
 \item{y_mean}{Mean of the training observations (needed by \code{predict_VCBART})}
@@ -83,4 +84,119 @@ VCBART attempts to learn the covariate effect functions beta_0(*) ... beta_p(*) 
 \item{trees}{A list (of length \code{nd}) of lists (of length \code{ncol(X_train)+1}) of character vectors (of length \code{M}) containing textual representations of the regression trees. The string for the s-th sample of the m-th tree in the j-th ensemble is contaiend in \code{trees[[s]][[j]][m]}. These strings are parsed by \code{predict_VCBART} to reconstruct the C++ representations of the sampled trees.}
 }
 \examples{
+\dontrun{
+############
+# True beta functions
+beta0_true <- function(Z){
+  tmp_Z <- (Z+1)/2
+  return( 3 * tmp_Z[,1] + 
+  (2 - 5 * (tmp_Z[,2] > 0.5)) * sin(pi * tmp_Z[,1]) - 
+  2 * (tmp_Z[,2] > 0.5))
+}
+beta1_true <- function(Z){
+  tmp_Z <- (Z+1)/2
+  return(sin(2*tmp_Z[,1] + 0.5)/(4*tmp_Z[,1] + 1) + (2*tmp_Z[,1] - 0.5)^3)
+}
+beta2_true <- function(Z){
+  tmp_Z <- (Z+1)/2
+  return( (3 - 3*cos(6*pi*tmp_Z[,1]) * tmp_Z[,1]^2) * (tmp_Z[,1] > 0.6) - 
+  (10 * sqrt(tmp_Z[,1])) * (tmp_Z[,1] < 0.25) )
+}
+beta3_true <- function(Z){
+  #return(rep(0, times = nrow(Z)))
+  return(rep(1, times = nrow(Z)))
+}
+beta4_true <- function(Z){
+  tmp_Z <- (Z+1)/2
+  return(10 * sin(pi * tmp_Z[,1] * tmp_Z[,2]) + 
+  20 * (tmp_Z[,3] - 0.5)^2 + 
+  10 * tmp_Z[,4] + 5 * tmp_Z[,5])
+}
+beta5_true <- function(Z){
+  tmp_Z <- (Z+1)/2
+  return(exp(sin((0.9 * (tmp_Z[,1] + 0.48))^10)) + 
+  tmp_Z[,2] * tmp_Z[,3] + tmp_Z[,4])
+}
+
+################
+# Set up problem dimension
+###############
+n_train <- 250 
+n_test <- 25
+sigma <- 1
+
+set.seed(417)
+n_all <- n_train + n_test
+ni_all <- rep(4, times = n_all) # 4 observations per subject
+subj_id_all <- rep(1:n_all, each = 4) # give every subject an id number
+N_all <- sum(ni_all) # total number of observations
+
+p <- 5 # number of covariates
+R_cont <- 20 # number of continuous modifiers
+R_cat <- 0 # number of categorical modifiers
+R <- R_cont + R_cat
+
+Sigma_X <-  (0.5)^(abs(outer(1:p, 1:p, FUN = "-"))) # covariates are all correlated
+
+X_all <- MASS::mvrnorm(N_all, mu = rep(0, times = p), Sigma = Sigma_X)
+Z_cont_all <- matrix(runif(N_all * R_cont, min = -1, max = 1), nrow = N_all, ncol = R_cont)
+beta0_all <- beta0_true(Z_cont_all)
+beta1_all <- beta1_true(Z_cont_all)
+beta2_all <- beta2_true(Z_cont_all)
+beta3_all <- beta3_true(Z_cont_all)
+beta4_all <- beta4_true(Z_cont_all)
+beta5_all <- beta5_true(Z_cont_all)
+
+beta_all <- cbind(beta0_all, beta1_all, beta2_all, 
+beta3_all, beta4_all, beta5_all)
+
+mu_all <- beta0_all + X_all[,1] * beta1_all + X_all[,2] * beta2_all +
+  X_all[,3] * beta3_all + X_all[,4] * beta4_all + X_all[,5] * beta5_all
+Y_all <- mu_all + sigma * rnorm(n = N_all, mean = 0, sd = 1)
+
+
+#############
+# Create a training/testing split
+# since we randomly generated X and Z, 
+# we can just use first n_train subjects as train
+############
+train_subjects <- 1:n_train
+test_subjects <- (n_train+1):(n_train + n_test)
+
+test_index <- which(subj_id_all \%in\% test_subjects)
+train_index <- which(subj_id_all \%in\% train_subjects)
+
+ni_train <- ni_all[train_subjects]
+ni_test <- ni_all[test_subjects]
+
+N_train <- sum(ni_train)
+N_test <- sum(ni_test)
+
+X_train <- X_all[train_index,]
+X_test <- X_all[test_index,]
+
+Z_cont_train <- Z_cont_all[train_index,]
+Z_cont_test <- Z_cont_all[test_index,]
+subj_id_train <- rep(1:n_train, times = ni_train)
+
+Y_train <- Y_all[train_index]
+Y_test <- Y_all[test_index]
+
+beta_train <- beta_all[train_index,]
+beta_test <- beta_all[test_index,]
+
+fit <-
+  VCBART::VCBART_ind(Y_train = Y_train,
+                     subj_id_train = subj_id_train,
+                     ni_train = ni_train,
+                     X_train = X_train,
+                     Z_cont_train = Z_cont_train,
+                     X_test = X_test,
+                     Z_cont_test = Z_cont_test,
+                     verbose = FALSE)
+plot(c(beta_train, beta_test),
+     c(fit$betahat.train.mean, fit$betahat.test.mean),
+     xlab = "Actual", ylab = "Fitted")
+abline(a = 0, b = 1, col = 'blue')
+}
 }

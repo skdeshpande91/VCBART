@@ -12,7 +12,7 @@ summarize_beta(beta_samples)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{beta_samples}{An array, returned by \code{VCBART_ind} or \code{VCBART_cs} of posterior samples of coefficient function evaluations}
+  \item{beta_samples}{An array, returned by \code{VCBART_ind}, \code{VCBART_cs}, or \code{predict_betas} of posterior samples of coefficient function evaluations}
 }
 
 \value{

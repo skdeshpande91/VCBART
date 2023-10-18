@@ -21,7 +21,7 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
           graph_split = rep(FALSE, times = ncol(Z_cat_train)),
           sparse = TRUE,
           rho = 0.9,
-          M = 200,
+          M = 50,
           mu0 = NULL, tau = NULL, nu = NULL, lambda = NULL,
           nd = 1000, burn = 1000, thin = 1,
           save_samples = TRUE, save_trees = TRUE,
@@ -46,7 +46,7 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
   \item{graph_split}{Vector of logicals indicating whether each categorical modifier is network-structured. Default is \code{rep(FALSE, times = ncol(Z_cat_train))}.}
   \item{sparse}{Logical, indicating whether or not to perform variable selection in each tree ensemble based on a sparse Dirichlet prior rather than uniform prior; see Linero 2018. Default is \code{TRUE}}
   \item{rho}{Initial auto-correlation parameter for compound symmetry error structure. Must be between 0 and 1. Default is 0.9.}
-  \item{M}{Number of trees in each ensemble. Default is 200.}
+  \item{M}{Number of trees in each ensemble. Default is 50.}
   \item{mu0}{Prior mean for jumps/leaf parameters. Default is 0 for each beta function. If supplied, must be a vector of length \code{1 + ncol(X_train)}.}
   \item{tau}{Prior standard deviation for jumps/leaf parameters. Default is \code{1/sqrt(M)} for each beta function. If supplied, must be a vector of length \code{1 + ncol(X_train)}.}
   \item{nu}{Degrees of freedom for scaled-inverse chi-square prior on sigma^2. Default is 3.}
@@ -60,7 +60,13 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
   \item{print_every}{As the MCMC runs, a message is printed every \code{print_every} iterations. Default is \code{floor( (nd*thin + burn)/10)} so that only 10 messages are printed.}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Given p covariates X1, ..., Xp and r modifiers Z1, ..., Zr, the varying coefficient model asserts that
+
+E[Y | X = x, Z = ] = beta_0(z) + beta_1(z) * x1 + ... beta_p(z) * xp.
+
+That is, for any r-vector z, the relationships between X and Y is linear. However, the specific relationship is allowed to vary across z's.
+VCBART attempts to learn the covariate effect functions beta_0(*) ... beta_p(*) using ensembles of regression trees.
+This function assumes that the within-subject errors are equi-correlated (i.e. a compound symmetry error structure).
 }
 \value{A list containing
 \item{y_mean}{Mean of the training observations (needed by \code{predict_VCBART})}
@@ -80,6 +86,4 @@ VCBART_cs(Y_train,subj_id_train, ni_train,X_train,
 \item{varcounts}{Array of size \code{nd} x R x \code{ncol(X)+1} that counts the number of times a variable was used in a decision rule in each posterior sample of each ensemble. Here R is the total number of potential modifiers (i.e. \code{R = ncol(Z_cont_train) + ncol(Z_cat_train)}).}
 \item{theta}{If \code{sparse=TRUE}, an array of size \code{nd} x R \code{ncol(X)+1} containing samples of the variable splitting probabilities.}
 \item{trees}{A list (of length \code{nd}) of lists (of length \code{ncol(X_train)+1}) of character vectors (of length \code{M}) containing textual representations of the regression trees. The string for the s-th sample of the m-th tree in the j-th ensemble is contaiend in \code{trees[[s]][[j]][m]}. These strings are parsed by \code{predict_VCBART} to reconstruct the C++ representations of the sampled trees.}
-}
-\examples{
 }
