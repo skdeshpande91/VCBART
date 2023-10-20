@@ -21,6 +21,7 @@ But in case you haven't and are unable to install **VCBART**, you might find the
 
 + [R for macOS](https://cran.r-project.org/bin/macosx/tools/) for more information.
 + [Instructions from The Coatless Professor](https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/). Note that these instructions may not be relevant for later versions of macOS (e.g. ones shipped with an Apple silicon processor)
++ [This StackOverflow post](https://stackoverflow.com/questions/69639782/installing-gfortran-on-macbook-with-apple-m1-chip-for-use-in-r/72997915#72997915), which outlines how to install the necessary C++ compiler, gfortran, and set the necessary paths. 
 
 
 ## Basic usage and reproducibility
