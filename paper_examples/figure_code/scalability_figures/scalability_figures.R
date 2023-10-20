@@ -1,6 +1,6 @@
 n_train_list <- c(25, 50, 100, 
                   125,250, 500, 1000,
-                  1250, 2500, 5000)
+                  1250, 2500, 5000, 10000, 12500)
 
 ystar_rmse_test <- rep(NA, times = length(n_train_list))
 ystar_cov_test <- rep(NA, times = length(n_train_list))
@@ -28,10 +28,11 @@ for(nix in 1:length(n_train_list)){
     tmp <- get(paste0("results_n", n_train))
     
     ystar_rmse_test[nix] <- mean(tmp$ystar_rmse_test)
-    ystar_cov_test[nix] <- mean(tmp$ystar_cov_test)
-    
     beta_mse_test[nix] <- mean(rowMeans(tmp$beta_mse_test))
-    beta_cov_test[nix] <- mean(rowMeans(tmp$beta_cov_test))
+    
+    #ystar_cov_test[nix] <- mean(tmp$ystar_cov_test)
+    
+    #beta_cov_test[nix] <- mean(rowMeans(tmp$beta_cov_test))
     
     timing[nix] <- mean(tmp$timing)
     
@@ -54,15 +55,15 @@ N_list <- 4 * n_train_list
 log_N_list <- log(N_list, base = 10)
 log_N_lim <- c(1, 5)
 
-xlabels <- c(10, 100, 1000, 10000)
-ticks <- 1:4
+xlabels <- c(50, 500, 5000, 50000)
+ticks <- log(xlabels, base = 10)
 
 
 ###################################
 # Covariate effect recovery
 ###################################
 
-pdf("p5R20_scale_beta.pdf", width = 3, height = 3)
+pdf("../../figures/p5R20_scale_beta.pdf", width = 3, height = 3)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", 
      xlim = log_N_lim, ylim = c(0,5),
@@ -76,12 +77,12 @@ dev.off()
 #################################
 # Predictive RMSE
 #################################
-pdf("p5R20_scale_ystar.pdf", width = 3, height = 3)
+pdf("../../figures/p5R20_scale_ystar.pdf", width = 3, height = 3)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", 
      xlim = log_N_lim, ylim = c(0,5),
      xaxt = "n", xlab = expression("Total observations (N)"),
-     ylab = expression("RMSE"), main = expression("Covariate effect recovery"))
+     ylab = expression("RMSE"), main = expression("Predictive performance"))
 axis(side = 1, at = ticks, labels = xlabels)
 lines(log_N_list, ystar_rmse_test)
 points(log_N_list, ystar_rmse_test, pch = 16, cex = 0.7)
@@ -94,7 +95,7 @@ my_colors <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
                "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 
-pdf("p5R20_scale_varsel.pdf", width = 3, height = 3)
+pdf("../../figures/p5R20_scale_varsel.pdf", width = 3, height = 3)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", 
      xlim = log_N_lim, ylim = c(0,1),
@@ -117,8 +118,6 @@ points(log_N_list, f1, col = my_colors[8], pch = 18)
 legend("bottomright", bty = "n", pch = 15:18, 
        col = my_colors[c(2,3,4,8)],
        legend = c("Sensitivity", "Specificity", "Precision", "F1"))
-lines(log_N_list, ystar_rmse_test)
-points(log_N_list, ystar_rmse_test, pch = 16, cex = 0.7)
 dev.off()
 
 
@@ -126,10 +125,10 @@ dev.off()
 # Runtime
 ###################
 
-pdf("p5R20_scale_time.pdf", width = 3, height = 3)
+pdf("../../figures/p5R20_scale_time.pdf", width = 3, height = 3)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", 
-     xlim = log_N_lim, ylim = c(0, 1200),
+     xlim = log_N_lim, ylim = c(0, 4800),
      xaxt = "n", xlab = expression("Total observations (N)"),
      ylab = expression("Seconds"), main = expression("Runtime"))
 axis(side = 1, at = ticks, labels = xlabels)
