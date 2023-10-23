@@ -8,3 +8,8 @@ VCBART/src/*.o
 VCBARTdev/src/*.o
 results/*.RData
 testing/*
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.Rcheck

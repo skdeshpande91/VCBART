@@ -1,5 +1,0 @@
-export("VCBART")
-export("get_beta_support")
-export("summarize_beta")
-export("summarize_posterior_predictive")
-useDynLib(VCBARTdev)

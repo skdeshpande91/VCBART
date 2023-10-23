@@ -6,273 +6,153 @@
 
 using namespace Rcpp;
 
-// vcbart_cs_adapt_split_adapt_rho
-Rcpp::List vcbart_cs_adapt_split_adapt_rho(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, double rho_eps, double a, double b, size_t N_u, double rho_alpha, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_cs_adapt_split_adapt_rho(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP rho_epsSEXP, SEXP aSEXP, SEXP bSEXP, SEXP N_uSEXP, SEXP rho_alphaSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
+// predict_vcbart
+arma::cube predict_vcbart(Rcpp::List tree_draws, int p, int M, Rcpp::NumericMatrix tZ_cont, Rcpp::IntegerMatrix tZ_cat, bool verbose);
+RcppExport SEXP _VCBART_predict_vcbart(SEXP tree_drawsSEXP, SEXP pSEXP, SEXP MSEXP, SEXP tZ_contSEXP, SEXP tZ_catSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type tree_draws(tree_drawsSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type M(MSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tZ_cont(tZ_contSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type tZ_cat(tZ_catSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< double >::type rho_eps(rho_epsSEXP);
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    Rcpp::traits::input_parameter< size_t >::type N_u(N_uSEXP);
-    Rcpp::traits::input_parameter< double >::type rho_alpha(rho_alphaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_cs_adapt_split_adapt_rho(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, rho_eps, a, b, N_u, rho_alpha, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
+    rcpp_result_gen = Rcpp::wrap(predict_vcbart(tree_draws, p, M, tZ_cont, tZ_cat, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
-// vcbart_cs_adapt_split_fixed_rho
-Rcpp::List vcbart_cs_adapt_split_fixed_rho(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, double rho_eps, double a, double b, size_t N_u, double rho_alpha, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_cs_adapt_split_fixed_rho(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP rho_epsSEXP, SEXP aSEXP, SEXP bSEXP, SEXP N_uSEXP, SEXP rho_alphaSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
+// rescale_beta_mean
+arma::mat rescale_beta_mean(arma::mat beta_input, double y_mean, double y_sd, Rcpp::NumericVector x_mean, Rcpp::NumericVector x_sd);
+RcppExport SEXP _VCBART_rescale_beta_mean(SEXP beta_inputSEXP, SEXP y_meanSEXP, SEXP y_sdSEXP, SEXP x_meanSEXP, SEXP x_sdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< double >::type rho_eps(rho_epsSEXP);
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    Rcpp::traits::input_parameter< size_t >::type N_u(N_uSEXP);
-    Rcpp::traits::input_parameter< double >::type rho_alpha(rho_alphaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_cs_adapt_split_fixed_rho(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, rho_eps, a, b, N_u, rho_alpha, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
+    Rcpp::traits::input_parameter< arma::mat >::type beta_input(beta_inputSEXP);
+    Rcpp::traits::input_parameter< double >::type y_mean(y_meanSEXP);
+    Rcpp::traits::input_parameter< double >::type y_sd(y_sdSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x_mean(x_meanSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x_sd(x_sdSEXP);
+    rcpp_result_gen = Rcpp::wrap(rescale_beta_mean(beta_input, y_mean, y_sd, x_mean, x_sd));
     return rcpp_result_gen;
 END_RCPP
 }
-// vcbart_cs_fixed_split_adapt_rho
-Rcpp::List vcbart_cs_fixed_split_adapt_rho(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, double rho_eps, Rcpp::List theta_list, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_cs_fixed_split_adapt_rho(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP rho_epsSEXP, SEXP theta_listSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
+// rescale_beta
+arma::cube rescale_beta(arma::cube beta_input, double y_mean, double y_sd, Rcpp::NumericVector x_mean, Rcpp::NumericVector x_sd);
+RcppExport SEXP _VCBART_rescale_beta(SEXP beta_inputSEXP, SEXP y_meanSEXP, SEXP y_sdSEXP, SEXP x_meanSEXP, SEXP x_sdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< double >::type rho_eps(rho_epsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type theta_list(theta_listSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_cs_fixed_split_adapt_rho(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, rho_eps, theta_list, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
+    Rcpp::traits::input_parameter< arma::cube >::type beta_input(beta_inputSEXP);
+    Rcpp::traits::input_parameter< double >::type y_mean(y_meanSEXP);
+    Rcpp::traits::input_parameter< double >::type y_sd(y_sdSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x_mean(x_meanSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x_sd(x_sdSEXP);
+    rcpp_result_gen = Rcpp::wrap(rescale_beta(beta_input, y_mean, y_sd, x_mean, x_sd));
     return rcpp_result_gen;
 END_RCPP
 }
-// vcbart_cs_fixed_split_fixed_rho
-Rcpp::List vcbart_cs_fixed_split_fixed_rho(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, double rho_eps, Rcpp::List theta_list, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_cs_fixed_split_fixed_rho(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP rho_epsSEXP, SEXP theta_listSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
+// vcbart_cs_fit
+Rcpp::List vcbart_cs_fit(Rcpp::NumericVector Y_train, double rho_init, Rcpp::IntegerVector subj_id_train, Rcpp::IntegerVector ni_train, Rcpp::NumericMatrix tX_train, Rcpp::NumericMatrix tZ_cont_train, Rcpp::IntegerMatrix tZ_cat_train, Rcpp::NumericMatrix tX_test, Rcpp::NumericMatrix tZ_cont_test, Rcpp::IntegerMatrix tZ_cat_test, Rcpp::LogicalVector unif_cuts, Rcpp::Nullable<Rcpp::List> cutpoints_list, Rcpp::Nullable<Rcpp::List> cat_levels_list, Rcpp::Nullable<Rcpp::List> edge_mat_list, Rcpp::LogicalVector graph_split, int graph_cut_type, bool rc_split, double prob_rc, double a_rc, double b_rc, bool sparse, double a_u, double b_u, Rcpp::NumericVector mu0, Rcpp::NumericVector tau, double lambda, double nu, int M, int nd, int burn, int thin, bool save_samples, bool save_trees, bool verbose, int print_every);
+RcppExport SEXP _VCBART_vcbart_cs_fit(SEXP Y_trainSEXP, SEXP rho_initSEXP, SEXP subj_id_trainSEXP, SEXP ni_trainSEXP, SEXP tX_trainSEXP, SEXP tZ_cont_trainSEXP, SEXP tZ_cat_trainSEXP, SEXP tX_testSEXP, SEXP tZ_cont_testSEXP, SEXP tZ_cat_testSEXP, SEXP unif_cutsSEXP, SEXP cutpoints_listSEXP, SEXP cat_levels_listSEXP, SEXP edge_mat_listSEXP, SEXP graph_splitSEXP, SEXP graph_cut_typeSEXP, SEXP rc_splitSEXP, SEXP prob_rcSEXP, SEXP a_rcSEXP, SEXP b_rcSEXP, SEXP sparseSEXP, SEXP a_uSEXP, SEXP b_uSEXP, SEXP mu0SEXP, SEXP tauSEXP, SEXP lambdaSEXP, SEXP nuSEXP, SEXP MSEXP, SEXP ndSEXP, SEXP burnSEXP, SEXP thinSEXP, SEXP save_samplesSEXP, SEXP save_treesSEXP, SEXP verboseSEXP, SEXP print_everySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Y_train(Y_trainSEXP);
+    Rcpp::traits::input_parameter< double >::type rho_init(rho_initSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type subj_id_train(subj_id_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type ni_train(ni_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tX_train(tX_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tZ_cont_train(tZ_cont_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type tZ_cat_train(tZ_cat_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tX_test(tX_testSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tZ_cont_test(tZ_cont_testSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type tZ_cat_test(tZ_cat_testSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type unif_cuts(unif_cutsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type cutpoints_list(cutpoints_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type cat_levels_list(cat_levels_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type edge_mat_list(edge_mat_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type graph_split(graph_splitSEXP);
+    Rcpp::traits::input_parameter< int >::type graph_cut_type(graph_cut_typeSEXP);
+    Rcpp::traits::input_parameter< bool >::type rc_split(rc_splitSEXP);
+    Rcpp::traits::input_parameter< double >::type prob_rc(prob_rcSEXP);
+    Rcpp::traits::input_parameter< double >::type a_rc(a_rcSEXP);
+    Rcpp::traits::input_parameter< double >::type b_rc(b_rcSEXP);
+    Rcpp::traits::input_parameter< bool >::type sparse(sparseSEXP);
+    Rcpp::traits::input_parameter< double >::type a_u(a_uSEXP);
+    Rcpp::traits::input_parameter< double >::type b_u(b_uSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type mu0(mu0SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tau(tauSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type nu(nuSEXP);
+    Rcpp::traits::input_parameter< int >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type nd(ndSEXP);
+    Rcpp::traits::input_parameter< int >::type burn(burnSEXP);
+    Rcpp::traits::input_parameter< int >::type thin(thinSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_samples(save_samplesSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_trees(save_treesSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< double >::type rho_eps(rho_epsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type theta_list(theta_listSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_cs_fixed_split_fixed_rho(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, rho_eps, theta_list, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
+    Rcpp::traits::input_parameter< int >::type print_every(print_everySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcbart_cs_fit(Y_train, rho_init, subj_id_train, ni_train, tX_train, tZ_cont_train, tZ_cat_train, tX_test, tZ_cont_test, tZ_cat_test, unif_cuts, cutpoints_list, cat_levels_list, edge_mat_list, graph_split, graph_cut_type, rc_split, prob_rc, a_rc, b_rc, sparse, a_u, b_u, mu0, tau, lambda, nu, M, nd, burn, thin, save_samples, save_trees, verbose, print_every));
     return rcpp_result_gen;
 END_RCPP
 }
-// vcbart_ind_adapt_split
-Rcpp::List vcbart_ind_adapt_split(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, double a, double b, size_t N_u, double rho_alpha, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_ind_adapt_split(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP aSEXP, SEXP bSEXP, SEXP N_uSEXP, SEXP rho_alphaSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
+// vcbart_ind_fit
+Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train, Rcpp::IntegerVector subj_id_train, Rcpp::IntegerVector ni_train, Rcpp::NumericMatrix tX_train, Rcpp::NumericMatrix tZ_cont_train, Rcpp::IntegerMatrix tZ_cat_train, Rcpp::NumericMatrix tX_test, Rcpp::NumericMatrix tZ_cont_test, Rcpp::IntegerMatrix tZ_cat_test, Rcpp::LogicalVector unif_cuts, Rcpp::Nullable<Rcpp::List> cutpoints_list, Rcpp::Nullable<Rcpp::List> cat_levels_list, Rcpp::Nullable<Rcpp::List> edge_mat_list, Rcpp::LogicalVector graph_split, int graph_cut_type, bool rc_split, double prob_rc, double a_rc, double b_rc, bool sparse, double a_u, double b_u, Rcpp::NumericVector mu0, Rcpp::NumericVector tau, double lambda, double nu, int M, int nd, int burn, int thin, bool save_samples, bool save_trees, bool verbose, int print_every);
+RcppExport SEXP _VCBART_vcbart_ind_fit(SEXP Y_trainSEXP, SEXP subj_id_trainSEXP, SEXP ni_trainSEXP, SEXP tX_trainSEXP, SEXP tZ_cont_trainSEXP, SEXP tZ_cat_trainSEXP, SEXP tX_testSEXP, SEXP tZ_cont_testSEXP, SEXP tZ_cat_testSEXP, SEXP unif_cutsSEXP, SEXP cutpoints_listSEXP, SEXP cat_levels_listSEXP, SEXP edge_mat_listSEXP, SEXP graph_splitSEXP, SEXP graph_cut_typeSEXP, SEXP rc_splitSEXP, SEXP prob_rcSEXP, SEXP a_rcSEXP, SEXP b_rcSEXP, SEXP sparseSEXP, SEXP a_uSEXP, SEXP b_uSEXP, SEXP mu0SEXP, SEXP tauSEXP, SEXP lambdaSEXP, SEXP nuSEXP, SEXP MSEXP, SEXP ndSEXP, SEXP burnSEXP, SEXP thinSEXP, SEXP save_samplesSEXP, SEXP save_treesSEXP, SEXP verboseSEXP, SEXP print_everySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type Y_train(Y_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type subj_id_train(subj_id_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type ni_train(ni_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tX_train(tX_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tZ_cont_train(tZ_cont_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type tZ_cat_train(tZ_cat_trainSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tX_test(tX_testSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type tZ_cont_test(tZ_cont_testSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type tZ_cat_test(tZ_cat_testSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type unif_cuts(unif_cutsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type cutpoints_list(cutpoints_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type cat_levels_list(cat_levels_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type edge_mat_list(edge_mat_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type graph_split(graph_splitSEXP);
+    Rcpp::traits::input_parameter< int >::type graph_cut_type(graph_cut_typeSEXP);
+    Rcpp::traits::input_parameter< bool >::type rc_split(rc_splitSEXP);
+    Rcpp::traits::input_parameter< double >::type prob_rc(prob_rcSEXP);
+    Rcpp::traits::input_parameter< double >::type a_rc(a_rcSEXP);
+    Rcpp::traits::input_parameter< double >::type b_rc(b_rcSEXP);
+    Rcpp::traits::input_parameter< bool >::type sparse(sparseSEXP);
+    Rcpp::traits::input_parameter< double >::type a_u(a_uSEXP);
+    Rcpp::traits::input_parameter< double >::type b_u(b_uSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type mu0(mu0SEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tau(tauSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type nu(nuSEXP);
+    Rcpp::traits::input_parameter< int >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type nd(ndSEXP);
+    Rcpp::traits::input_parameter< int >::type burn(burnSEXP);
+    Rcpp::traits::input_parameter< int >::type thin(thinSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_samples(save_samplesSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_trees(save_treesSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    Rcpp::traits::input_parameter< size_t >::type N_u(N_uSEXP);
-    Rcpp::traits::input_parameter< double >::type rho_alpha(rho_alphaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_ind_adapt_split(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, a, b, N_u, rho_alpha, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
-    return rcpp_result_gen;
-END_RCPP
-}
-// vcbart_ind_adapt_split_fixed_dirichlet
-Rcpp::List vcbart_ind_adapt_split_fixed_dirichlet(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, double init_alpha_z, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_ind_adapt_split_fixed_dirichlet(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP init_alpha_zSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< double >::type init_alpha_z(init_alpha_zSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_ind_adapt_split_fixed_dirichlet(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, init_alpha_z, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
-    return rcpp_result_gen;
-END_RCPP
-}
-// vcbart_ind_fixed_split
-Rcpp::List vcbart_ind_fixed_split(arma::vec Y, arma::mat X_train, arma::mat Z_train, arma::vec n_vec_train, arma::vec start_index_vec_train, arma::mat X_test, arma::mat Z_test, arma::vec n_vec_test, arma::vec start_index_vec_test, Rcpp::List xinfo_list, size_t M, bool ht_sigma_y, bool ht_tau, size_t burn, size_t nd, bool verbose, size_t print_every, Rcpp::List theta_list, arma::vec tau_vec, arma::vec alpha_vec, arma::vec beta_vec, double sigma_hat, double nu_sigma, double nu_tau, double variance_prob);
-RcppExport SEXP _VCBART_vcbart_ind_fixed_split(SEXP YSEXP, SEXP X_trainSEXP, SEXP Z_trainSEXP, SEXP n_vec_trainSEXP, SEXP start_index_vec_trainSEXP, SEXP X_testSEXP, SEXP Z_testSEXP, SEXP n_vec_testSEXP, SEXP start_index_vec_testSEXP, SEXP xinfo_listSEXP, SEXP MSEXP, SEXP ht_sigma_ySEXP, SEXP ht_tauSEXP, SEXP burnSEXP, SEXP ndSEXP, SEXP verboseSEXP, SEXP print_everySEXP, SEXP theta_listSEXP, SEXP tau_vecSEXP, SEXP alpha_vecSEXP, SEXP beta_vecSEXP, SEXP sigma_hatSEXP, SEXP nu_sigmaSEXP, SEXP nu_tauSEXP, SEXP variance_probSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_train(X_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_train(Z_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_train(n_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_train(start_index_vec_trainSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X_test(X_testSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Z_test(Z_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type n_vec_test(n_vec_testSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type start_index_vec_test(start_index_vec_testSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type xinfo_list(xinfo_listSEXP);
-    Rcpp::traits::input_parameter< size_t >::type M(MSEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_sigma_y(ht_sigma_ySEXP);
-    Rcpp::traits::input_parameter< bool >::type ht_tau(ht_tauSEXP);
-    Rcpp::traits::input_parameter< size_t >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< size_t >::type nd(ndSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< size_t >::type print_every(print_everySEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type theta_list(theta_listSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type tau_vec(tau_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type alpha_vec(alpha_vecSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta_vec(beta_vecSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_hat(sigma_hatSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_sigma(nu_sigmaSEXP);
-    Rcpp::traits::input_parameter< double >::type nu_tau(nu_tauSEXP);
-    Rcpp::traits::input_parameter< double >::type variance_prob(variance_probSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcbart_ind_fixed_split(Y, X_train, Z_train, n_vec_train, start_index_vec_train, X_test, Z_test, n_vec_test, start_index_vec_test, xinfo_list, M, ht_sigma_y, ht_tau, burn, nd, verbose, print_every, theta_list, tau_vec, alpha_vec, beta_vec, sigma_hat, nu_sigma, nu_tau, variance_prob));
+    Rcpp::traits::input_parameter< int >::type print_every(print_everySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcbart_ind_fit(Y_train, subj_id_train, ni_train, tX_train, tZ_cont_train, tZ_cat_train, tX_test, tZ_cont_test, tZ_cat_test, unif_cuts, cutpoints_list, cat_levels_list, edge_mat_list, graph_split, graph_cut_type, rc_split, prob_rc, a_rc, b_rc, sparse, a_u, b_u, mu0, tau, lambda, nu, M, nd, burn, thin, save_samples, save_trees, verbose, print_every));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_VCBART_vcbart_cs_adapt_split_adapt_rho", (DL_FUNC) &_VCBART_vcbart_cs_adapt_split_adapt_rho, 29},
-    {"_VCBART_vcbart_cs_adapt_split_fixed_rho", (DL_FUNC) &_VCBART_vcbart_cs_adapt_split_fixed_rho, 29},
-    {"_VCBART_vcbart_cs_fixed_split_adapt_rho", (DL_FUNC) &_VCBART_vcbart_cs_fixed_split_adapt_rho, 26},
-    {"_VCBART_vcbart_cs_fixed_split_fixed_rho", (DL_FUNC) &_VCBART_vcbart_cs_fixed_split_fixed_rho, 26},
-    {"_VCBART_vcbart_ind_adapt_split", (DL_FUNC) &_VCBART_vcbart_ind_adapt_split, 28},
-    {"_VCBART_vcbart_ind_adapt_split_fixed_dirichlet", (DL_FUNC) &_VCBART_vcbart_ind_adapt_split_fixed_dirichlet, 25},
-    {"_VCBART_vcbart_ind_fixed_split", (DL_FUNC) &_VCBART_vcbart_ind_fixed_split, 25},
+    {"_VCBART_predict_vcbart", (DL_FUNC) &_VCBART_predict_vcbart, 6},
+    {"_VCBART_rescale_beta_mean", (DL_FUNC) &_VCBART_rescale_beta_mean, 5},
+    {"_VCBART_rescale_beta", (DL_FUNC) &_VCBART_rescale_beta, 5},
+    {"_VCBART_vcbart_cs_fit", (DL_FUNC) &_VCBART_vcbart_cs_fit, 35},
+    {"_VCBART_vcbart_ind_fit", (DL_FUNC) &_VCBART_vcbart_ind_fit, 34},
     {NULL, NULL, 0}
 };
 

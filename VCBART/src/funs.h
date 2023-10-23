@@ -1,66 +1,45 @@
-//
-//  funs.h
-//  
-//
-//  Created by Sameer Deshpande on 8/21/19.
-//
+
 
 #ifndef GUARD_funs_h
 #define GUARD_funs_h
-#include <RcppArmadillo.h>
-#include <cmath>
+
 #include "tree.h"
-#include "info.h"
-#include "kernels.h"
-#include <stdio.h>
-
-#endif 
 
 
-//--------------------------------------------------
-// center and scale each column of the X matrix and outcomes Y
-void prepare_x(arma::mat &X_all, std::vector<double> &x_col_mean, std::vector<double> &x_col_sd);
-void prepare_x(arma::mat &X_train, arma::mat &X_test, std::vector<double> &x_col_mean, std::vector<double> &x_col_sd);
-void prepare_y(arma::vec &Y, double &y_mean, double &y_sd, double &y_max, double &y_min);
-//void prepare_precision_ar(std::vector<std::vector<arma::mat> > &Omega_all, std::vector<std::vector<double> > &log_det_all, std::vector<double> rho, data_info &di);
-//void prepare_precision_cs(std::vector<std::vector<arma::mat> > &Omega_all, std::vector<std::vector<double> > &log_det_all, std::vector<double> rho, data_info &di);
-//void prepare_precision_ind(std::vector<std::vector<arma::mat> > &Omega_all, std::vector<std::vector<double> > &log_det_all, data_info &di);
-//--------------------------------------------------
-
-//does a (bottom) node have variables you can split on?
-bool cansplit(tree::tree_p n, xinfo& xi);
-//--------------------------------------------------
-//compute prob of a birth, goodbots will contain all the good bottom nodes
-double getpb(tree &t, xinfo &xi, tree_prior_info &tree_pi, tree::npv &goodbots);
-//--------------------------------------------------
-//find variables n can split on, put their indices in goodvars
-void getgoodvars(tree::tree_p n, xinfo& xi,  std::vector<size_t>& goodvars);
-//get prob a node grows, 0 if no good vars, else alpha/(1+d)^beta
-//double pgrow(tree::tree_p n, xinfo &xi, tree_prior_info &tree_pi);
-double pgrow(tree::tree_p n, xinfo &xi, tree_prior_info &tree_pi, size_t k); // k tells us which beta function we're updating
-//--------------------------------------------------
-//get sufficients stats for all bottom nodes
-void allsuff(tree &x, xinfo &xi, data_info &di, tree::npv &bnv, std::vector<sinfo> &sv);
-//--------------------------------------------------
-//get sufficient stats for children (v,c) of node nx in tree x
-//[SKD]: used in the birth proposals
-void getsuff(tree &x, tree::tree_cp nx, size_t v, size_t c, xinfo &xi, data_info &di, sinfo &sl, sinfo &sr, sinfo &st);
-//--------------------------------------------------
-//get sufficient stats for pair of bottom children nl(left) and nr(right) in tree x
-//[SKD]: used in the death proposals
-// st contains all of the observations in both nl and nr
-void getsuff(tree &x, tree::tree_cp nl, tree::tree_cp nr, xinfo &xi, data_info &di, sinfo &sl, sinfo &sr, sinfo &st);
-
-//--------------------------------------------------
-// new functions for getting all sufficient statistics for use with bd_fast
-
-// for birth proposal
-void getsuff(tree &x, tree::tree_cp nx, size_t v, size_t c, xinfo &xi, data_info &di, std::vector<sinfo> &sv_x, std::vector<sinfo> &sv_y);
-// for death proposal
-void getsuff(tree &x, tree::tree_cp nl, tree::tree_cp nr, xinfo &xi, data_info &di, std::vector<sinfo> &sv_x, std::vector<sinfo> &sv_y);
+void tree_traversal(suff_stat &ss, tree &t, data_info &di);
 
 
+//void fit_single_tree(double* ftemp, tree &t, data_info &di);
+void fit_ensemble(std::vector<double> &fit, std::vector<tree> &t_vec, data_info &di);
 
-//--------------------------------------------------
-// fit
-void fit(tree& t, xinfo& xi, data_info& di, double* fv);
+void compute_suff_stat_grow(suff_stat &orig_suff_stat, suff_stat &new_suff_stat, int &nx_nid, rule_t &rule, tree &t, data_info &di);
+void compute_suff_stat_prune(suff_stat &orig_suff_stat, suff_stat &new_suff_stat, int &nl_nid, int &nr_nid, int &np_nid, tree &t, data_info &di);
+
+void compute_p_theta_ind(int &j, arma::mat &P, arma::vec &Theta, std::map<int,int> &leaf_map, suff_stat &ss, double &sigma, data_info &di, tree_prior_info &tree_pi);
+
+void compute_p_theta_cs(int &j, arma::mat &P, arma::vec &Theta, std::map<int,int> &leaf_map, suff_stat &ss, double &rho, double &sigma, data_info &di, tree_prior_info &tree_pi);
+
+
+double compute_lil(arma::mat &P, arma::vec &Theta, tree_prior_info &tree_pi);
+
+void draw_mu(tree &t, arma::mat &P, arma::vec &Theta, std::map<int,int> &leaf_map, RNG &gen);
+
+void draw_rule(rule_t &rule, tree &t, int &nid, data_info &di, tree_prior_info &tree_pi, RNG &gen);
+std::string write_tree(tree &t, tree_prior_info &tree_pi, set_str_conversion &set_str);
+void read_tree(tree &t, std::string &tree_string, set_str_conversion &set_str);
+
+void build_symmetric_edge_map(edge_map &emap, std::vector<edge> &edges, std::set<int> &vertices);
+std::vector<edge> get_induced_edges(std::vector<edge> &edges, std::set<int> &vertex_subset);
+void dfs(int v, std::map<int, bool> &visited, std::vector<int> &comp, edge_map &emap);
+void find_components(std::vector<std::vector<int> > &components, std::vector<edge> &edges, std::set<int> &vertices);
+void get_unique_edges(std::vector<edge> &edges);
+void boruvka(std::vector<edge> &mst_edges, std::vector<edge> &edges, std::set<int> &vertices);
+void wilson(std::vector<edge> &mst_edges, std::vector<edge> &edges, std::set<int> &vertices, RNG &gen);
+void graph_partition(std::set<int> &avail_levels, std::set<int> &l_vals, std::set<int> &r_vals, std::vector<edge> &orig_edges, int &K, int &cut_type, RNG &gen);
+void update_theta_u(std::vector<double> &theta, double &u, std::vector<int> &var_count, int &R, double &a_u, double &b_u, RNG &gen);
+void update_theta_rc(double& theta_rc, int &rc_var_count, int &rc_rule_count, double &a_rc, double &b_rc, int &R_cont, RNG &gen);
+void update_rho(double &rho, double &sigma, data_info &di, RNG &gen);
+
+void update_sigma_ind(double &sigma, double &nu, double &lambda, data_info &di, RNG &gen);
+void update_sigma_cs(double &sigma, double &rho, double &nu, double &lambda, data_info &di, RNG &gen);
+#endif /* funs_h */

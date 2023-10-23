@@ -1,6 +1,9 @@
-export("VCBART")
-export("get_beta_support")
+export("VCBART_ind")
+export("VCBART_cs")
 export("summarize_beta")
-export("summarize_posterior_predictive")
+export("predict_betas")
+importFrom("Rcpp", "evalCpp")
+importFrom("stats", "quantile")
+importFrom("MASS", "mvrnorm")
 useDynLib(VCBART)
 
