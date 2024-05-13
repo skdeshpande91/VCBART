@@ -1,6 +1,7 @@
 library(igraph)
 library(dplyr)
 library(ggplot2)
+library(ggmap)
 
 ###################
 # Map of census tracts colored by average density
@@ -48,15 +49,15 @@ mean_levels_plot <-
   geom_polygon(data = plot_data, aes(x = long, y = lat, group = group, fill = mean_levels),
                color = alpha("black", 0.15), alpha = 1, show.legend = TRUE) + 
   scale_fill_distiller(type = "div", palette = "PRGn") + 
+  coord_map() + 
   theme(panel.background = element_blank(), 
         axis.ticks = element_blank(), 
         axis.text = element_blank(),
-        axis.title = element_blank(), 
-        aspect.ratio = 0.8,
-        legend.title = element_blank())
+        axis.title = element_blank(),
+        legend.title = element_blank(),
+        plot.margin = unit(c(0,0,0,0), 'lines'))
 
-ggsave(filename = "philly_map.pdf", width = 6, height = 6, units = "in",
-       plot = mean_levels_plot)
+
 ##########################
 # Selected time series
 
@@ -65,37 +66,35 @@ my_tract <- paste0("tr.", tracts@data[index, "GEOID10"])
 adj_tracts <- rownames(A_tract)[A_tract[,my_tract] == 1]
 my_tracts <- c(my_tract, adj_tracts)
 
+my_tracts <- c(my_tracts, rownames(A_tract)[181])
 
 col_list <- rev(RColorBrewer::brewer.pal(n = 11, name = "PRGn")) # define a color palette
 
 rescaled_means <- scales::rescale(mean_levels, to = c(0,1))
 
-pdf("philly_time_series.pdf",
-    width = 4.5, height = 3)
 par(mar = c(3,3,1,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n",xlim = c(1, n_times), xlab = "Time", xaxt = "n", 
      ylab = "Density",ylim = range(Y_mat), main = "")
+axis(side = 1, at = 1:n_times, labels = 2006:2021)
 for(tr in my_tracts){
-  if(mean_levels[tr] >= 25){
+  if(tr != my_tract){
     lines(1:n_times, Y_mat[tr,], lwd = 1,
           col = rgb(colorRamp(col_list,bias=1)(rescaled_means[tr])/255))
     points(1:n_times, Y_mat[tr,], 
            col = rgb(colorRamp(col_list,bias=1)(rescaled_means[tr])/255),
            pch = 16, cex = 0.75)
-  } else if(tr == my_tract){
+  } else {
     lines(1:n_times, Y_mat[tr,], lwd = 1,
           col = rgb(colorRamp(col_list,bias=1)(rescaled_means[tr])/255))
     points(1:n_times, Y_mat[tr,],
            col = rgb(colorRamp(col_list,bias=1)(rescaled_means[tr])/255),
-           pch = 16)
-  }
+           pch = 16, cex = 0.75)
+  } 
 }
-dev.off()
-
+text(x = 1, y = 22, labels = "T1", cex = 0.8 * par('usr')["cex"])
+text(x = 1.5, y = 7, labels = "T2", cex = 0.8 * par('usr')["cex"])
 
 # Network representation
-pdf("philly_network.pdf", width = 6, height = 6)
 par(mar = c(1,1,1,1), mgp = c(1.8, 0.5, 0))
 plot(g, layout = tract_layout,
      vertex.size = 4, vertex.label = NA, vertex.color = "gray")
-dev.off()

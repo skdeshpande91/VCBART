@@ -1,8 +1,11 @@
-# For the main HRS analysis, we ran several short MCMC chains in parallel
-# chain_num is just used for bookkeeping
-chain_num <- 5
+#args <- commandArgs(TRUE)
+#chain_num <- as.numeric(args[1])
 
-set.seed(817+chain_num)
+# In paper, we ran 4 chains in parallel in our HTC environment
+# The chain number was passed as a command line argument
+# To run locally, just increment the chain number manually or run in a loop
+chain_num <- 1
+set.seed(424+chain_num)
 
 load("hrs_data1.RData")
 
@@ -22,7 +25,7 @@ for(i in 1:n_all){
   subj_id_all <- c(subj_id_all, rep(i, times = ni_all[i]))
 }
 
-nd <- 50
+nd <- 1000
 burn <- 1000
 thin <- 1
 
@@ -43,6 +46,7 @@ fit <- VCBART::VCBART_cs(Y_train = Y_all,
 
 assign(paste0("chain", chain_num),
        list(trees = fit$trees,
-            varcounts = fit$varcounts[-(1:burn),,]))
+            varcounts = fit$varcounts[-(1:burn),,],
+            sigma = fit$sigma))
 
-save(list = paste0("chain", chain_num), file = paste0("chain", chain_num, ".RData"))
+save(list = paste0("chain", chain_num), file = paste0("hrs_chain", chain_num, ".RData"))
