@@ -358,7 +358,7 @@ void grow_tree_cs(tree &t, int &accept, int &j, double &rho, double &sigma, suff
   
   double log_like_ratio = prop_lil - orig_lil;
   double log_alpha = log_like_ratio + log_prior_ratio + log_trans_ratio; // MH ratio
-  if(gen.uniform() <= log_alpha){
+  if(gen.log_uniform() <= log_alpha){
     // accept the transition!!
     
     // bookkeping to update number of rules and count # of times variable is split upon
