@@ -2,3 +2,4 @@
 ^\.github$
 ^README\.md$
 ^paper_examples/*$
+^VCBART/*$
