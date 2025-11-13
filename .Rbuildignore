@@ -1,0 +1,4 @@
+^src/*.o$
+^\.github$
+^README\.md$
+^paper_examples/*$

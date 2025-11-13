@@ -1,0 +1,13 @@
+bibentry(bibtype="Manual",
+  title = "flexBART",
+  author = c(person(c("Sameer", "K"), "Deshpande"), 
+             person("Ray", "Bai""),
+             person("Cecilia", "Balocchi"),
+             person("Jennifer", "Starling"),
+             person("Jordan", "Weiss")),
+  year = "2025",
+  note="R package version 1.2.0")
+
+
+
+
