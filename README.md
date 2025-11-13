@@ -1,4 +1,10 @@
 # VCBART: Bayesian trees for varying coefficients
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/skdeshpande91/VCBART/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/skdeshpande91/VCBART/actions/workflows/R-CMD-check.yaml)
+  [![CRAN status](https://www.r-pkg.org/badges/version/VCBART)](https://CRAN.R-project.org/package=VCBART)
+<!-- badges: end -->
+
+
 
 An R package for fitting a linear varying coefficient model using Bayesian Additive Regression Trees.
 For more details about the VCBART procedure, see [our paper](https://arxiv.org/abs/2003.06416).
