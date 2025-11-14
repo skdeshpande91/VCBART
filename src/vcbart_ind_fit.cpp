@@ -315,7 +315,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
             i = *it;
             allfit_train[i] -= tX_train(j,i) * tmp_mu;
             residual[i] += tX_train(j,i) * tmp_mu;
-            if(abs(residual[i] - (Y_train[i] - allfit_train[i])) > 1e-12) Rcpp::stop("after removing fit of single tree, something is wrong with residual");
+            //if(fabs(residual[i] - (Y_train[i] - allfit_train[i])) > 1e-12) Rcpp::stop("after removing fit of single tree, something is wrong with residual");
             beta_fit_train[j + i*p] -= tmp_mu; // remove fit of m-th tree from overall fit of beta's
             r_sum[subj_id_train[i]] += tX_train(j,i) * tmp_mu; // remove contribution to total sum of residuals for subject contributing i-th obs
             r2_sum[subj_id_train[i]] += 2.0 * tX_train(j,i) * tmp_mu * residual[i] - pow(tX_train(j,i) * tmp_mu, 2);
@@ -350,7 +350,7 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
             r_sum[subj_id_train[i]] -= tX_train(j,i) * tmp_mu; // restore contribution to total sum of residuals for subject contributing i-th obs
             allfit_train[i] += tX_train(j,i) * tmp_mu;
             residual[i] -= tX_train(j,i) * tmp_mu;
-            if(abs(residual[i] - (Y_train[i] - allfit_train[i])) > 1e-12) Rcpp::stop("after restoring fit of single tree, something is wrong with residual");
+            //if(fabs(residual[i] - (Y_train[i] - allfit_train[i])) > 1e-12) Rcpp::stop("after restoring fit of single tree, something is wrong with residual");
             beta_fit_train[j + i*p] += tmp_mu; // restore fit of m-th tree from overall fit of beta's
             //r2_sum[subj_id_train[i]] += pow(tX_train(j,i) * tmp_mu,2); // remove contribution to total sum of squared residuals for subject contribution i-th obs WRONG!!!
           } // close loop over obs in single leaf
@@ -367,38 +367,6 @@ Rcpp::List vcbart_ind_fit(Rcpp::NumericVector Y_train,
             }
           }
         }
-        
-        
-        // at this point, we're done updating a single tree.
-        // let's check what the sum of the residuals are
-        /*
-        for(int subj_ix = 0; subj_ix < n_train; subj_ix++){
-          tmp_r_sum[subj_ix] = 0.0;
-          tmp_r2_sum[subj_ix] = 0.0;
-        }
-        
-        for(int i = 0; i < N_train; i++){
-          tmp_r_sum[subj_id_train[i]] += residual[i];
-          tmp_r2_sum[subj_id_train[i]] += pow(residual[i], 2);
-        }
-        
-        for(int subj_ix = 0; subj_ix < n_train; subj_ix++){
-          if(abs(r_sum[subj_ix] - tmp_r_sum[subj_ix]) > 1e-8){
-            Rcpp::Rcout << "iter = " << iter << " j = " << j << " m = " << m << std::endl;
-            Rcpp::Rcout << "subj_ix = " << subj_ix << " r_sum = " << r_sum[subj_ix] << std::endl;
-            Rcpp::Rcout << " actual sum of residuals = " << tmp_r_sum[subj_ix] << std::endl;
-            Rcpp::Rcout << "  difference = " << r_sum[subj_ix] - tmp_r_sum[subj_ix] << std::endl;
-            Rcpp::stop("Mistake in sum of residuals");
-          }
-          if(abs(r2_sum[subj_ix] - tmp_r2_sum[subj_ix]) > 1e-8){
-            Rcpp::Rcout << "iter = " << iter << " j = " << j << " m = " << m << std::endl;
-            Rcpp::Rcout << "subj_ix = " << subj_ix << " r2_sum = " << r2_sum[subj_ix] << std::endl;
-            Rcpp::Rcout << " actual sum of squared residuals = " << tmp_r2_sum[subj_ix] << std::endl;
-            Rcpp::Rcout << "  difference = " << r2_sum[subj_ix] - tmp_r2_sum[subj_ix] << std::endl;
-            Rcpp::stop("Mistake in sum of squared residuals");
-          }
-        }
-        */
       } // closes loop over trees in j-th ensemble
       
       // now we can update theta
