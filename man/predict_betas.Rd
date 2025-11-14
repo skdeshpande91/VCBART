@@ -1,6 +1,5 @@
 \name{predict_betas}
 \alias{predict_betas}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Compute posterior predictive evaluates of covariate effect functions.
 }
@@ -15,8 +14,8 @@ predict_betas(fit,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{fit}{A list returned by \code{VCBART_ind} or \code{VCBART_cs}}
-    \item{Z_cont}{Matrix of continuous modifiers at which you wish to evaluate the covariate effect functions. Default is a 1x1 matrix, which signals that no continuous modifiers are required for these evaluations.}
+  \item{fit}{A list returned by \code{\link{VCBART_ind}} or \code{\link{VCBART_cs}}}
+  \item{Z_cont}{Matrix of continuous modifiers at which you wish to evaluate the covariate effect functions. Default is a 1x1 matrix, which signals that no continuous modifiers are required for these evaluations.}
   \item{Z_cat}{Integer matrix of categorical modifiers at which you wish to evaluate the covariate effect functions. Default is a 1x1 matrix, which signals that no continuous modifiers are required for these evaluations.}
   \item{verbose}{Boolean indicating whether the code should print its progress (\code{TRUE}). Default is \code{TRUE}.}
 }

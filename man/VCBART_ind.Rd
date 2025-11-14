@@ -6,6 +6,7 @@ Fit a VCBART model with independent error structure
 }
 \description{
 Fit a varying coefficient model to panel data. Assumes residual errors are independent within and between subjects.
+See Deshpande et al. (2025) for details about the model and MCMC sampler.
 }
 \usage{
 VCBART_ind(Y_train,subj_id_train, ni_train,X_train,
@@ -57,12 +58,13 @@ VCBART_ind(Y_train,subj_id_train, ni_train,X_train,
   \item{print_every}{As the MCMC runs, a message is printed every \code{print_every} iterations. Default is \code{floor( (nd*thin + burn)/10)} so that only 10 messages are printed.}
 }
 \details{
-Given p covariates X1, ..., Xp and r modifiers Z1, ..., Zr, the varying coefficient model asserts that
+Given \eqn{p}{p} covariates \eqn{X_{1}, \ldots, X_{p}}{X1, ..., Xp} and \eqn{r}{r} effect modifiers \eqn{Z_{1}, \ldots, Z_{r}}{Z1, ..., Zr}, the varying coefficient model asserts that
 
-E[Y | X = x, Z = ] = beta_0(z) + beta_1(z) * x1 + ... beta_p(z) * xp.
+\eqn{E[Y \vert X = x, Z = ] = \beta_0(z) + \beta_1(z) * x_1 + ... \beta_p(z) * X_p.}{E[Y | X = x, Z = ] = beta_0(z) + beta_1(z) * x1 + ... beta_p(z) * xp.}
 
-That is, for any r-vector z, the relationships between X and Y is linear. However, the specific relationship is allowed to vary across z's.
-VCBART attempts to learn the covariate effect functions beta_0(*) ... beta_p(*) using ensembles of regression trees.
+That is, for any r-vector \eqn{Z}{Z}, the relationships between \eqn{X}{X} and \eqn{Y}{Y} is linear. 
+However, the specific relationship is allowed to vary with respect tp \eqn{Z}{Z}.
+VCBART approximates the covariate effect functions \eqn{\beta_0(Z), \ldots, \beta_p(Z)}{beta_0, ..., beta_p} using ensembles of regression trees.
 This function assumes that the within-subject errors are independent.
 }
 \value{A list containing
@@ -199,4 +201,8 @@ plot(c(beta_train, beta_test),
      xlab = "Actual", ylab = "Fitted")
 abline(a = 0, b = 1, col = 'blue')
 }
+}
+\references{
+Deshpande, S.K, Bai, R., Balocchi, C., Starling, J., and Weiss, J. (2025). VCBART: Bayesian trees for varying coefficients.
+\emph{Bayesian Analysis}. \doi{doi:10.1214/24-BA1470}
 }
