@@ -1,15 +1,15 @@
 Package: VCBART
 Type: Package
 Title: Fit Varying Coefficient Models with Bayesian Additive Regression Trees
-Version: 1.2.1
-Date: 2025-11-14
+Version: 1.2.2
+Date: 2025-11-19
 Authors@R: c(
   person(given = "Sameer K.", family = "Deshpande", role = c("aut", "cre"), email = "sameer.deshpande@wisc.edu", comment = c(ORCID = "0000-0003-4116-5533")),
   person(given = "Ray", family = "Bai", role = c("aut"), comment = c(ORCID = "0000-0002-7190-7844")),
   person(given = "Cecilia", family = "Balocchi", role = c("aut"), comment = c(ORCID = "0000-0002-1234-6063")),
   person(given = "Jennifer", family = "Starling", role = c("aut")),
   person(given = "Jordan", family = "Weiss", role = c("aut")))
-Description: Uses Bayesian Additive Regression Trees to estimate covariate effect functions in the linear varying coefficient model.
+Description: Fits linear varying coefficient (VC) models, which assert a linear relationship between an outcome and several covariates but allow that relationship (i.e., the coefficients or slopes in the linear regression) to change as functions of additional variables known as effect modifiers, by approximating the coefficient functions with Bayesian Additive Regression Trees. Implements a Metropolis-within-Gibbs sampler to simulate draws from the posterior over coefficient function evaluations. VC models with independent observations or repeated observations can be fit. For more details see Deshpande et al. (2024) <doi:10.1214/24-BA1470>.
 License: GPL (>= 3)
 LinkingTo: Rcpp, RcppArmadillo
 Imports: Rcpp, MASS

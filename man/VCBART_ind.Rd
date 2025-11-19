@@ -86,7 +86,7 @@ This function assumes that the within-subject errors are independent.
 \item{trees}{A list (of length \code{nd}) of lists (of length \code{ncol(X_train)+1}) of character vectors (of length \code{M}) containing textual representations of the regression trees. The string for the s-th sample of the m-th tree in the j-th ensemble is contaiend in \code{trees[[s]][[j]][m]}. These strings are parsed by \code{predict_VCBART} to reconstruct the C++ representations of the sampled trees.}
 }
 \examples{
-\dontrun{
+\donttest{
 ############
 # True beta functions
 beta0_true <- function(Z){

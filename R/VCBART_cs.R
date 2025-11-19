@@ -46,7 +46,7 @@ VCBART_cs <- function(Y_train,
   if(length(X_test) > 1){
     # There is a valid X_test
     if(ncol(X_test) != ncol(X_train)){
-      print(paste("X_train has", ncol(X_train), "columns but X_test has", ncol(X_test), "columns"))
+      message(paste("X_train has", ncol(X_train), "columns but X_test has", ncol(X_test), "columns"))
       stop("X_train and X_test must have the same number of columns")
     } else{
       # standardize X_test using the column means and sd's from the training data
