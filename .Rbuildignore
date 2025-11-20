@@ -3,3 +3,5 @@
 ^README\.md$
 ^paper_examples/*$
 ^VCBART/*$
+^VCBART_dev/*$
+^VCBART_dev*.tar.gz$

@@ -6,7 +6,7 @@ Fit a VCBART model with independent error structure
 }
 \description{
 Fit a varying coefficient model to panel data. Assumes residual errors are independent within and between subjects.
-See Deshpande et al. (2025) for details about the model and MCMC sampler.
+See Deshpande et al. (2024) for details about the model and MCMC sampler.
 }
 \usage{
 VCBART_ind(Y_train,subj_id_train, ni_train,X_train,
@@ -203,6 +203,6 @@ abline(a = 0, b = 1, col = 'blue')
 }
 }
 \references{
-Deshpande, S.K, Bai, R., Balocchi, C., Starling, J., and Weiss, J. (2025). VCBART: Bayesian trees for varying coefficients.
+Deshpande, S.K, Bai, R., Balocchi, C., Starling, J., and Weiss, J. (2024). VCBART: Bayesian trees for varying coefficients.
 \emph{Bayesian Analysis}. \doi{doi:10.1214/24-BA1470}
 }
