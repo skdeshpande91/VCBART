@@ -86,7 +86,11 @@ This function assumes that the within-subject errors are independent.
 \item{trees}{A list (of length \code{nd}) of lists (of length \code{ncol(X_train)+1}) of character vectors (of length \code{M}) containing textual representations of the regression trees. The string for the s-th sample of the m-th tree in the j-th ensemble is contaiend in \code{trees[[s]][[j]][m]}. These strings are parsed by \code{predict_VCBART} to reconstruct the C++ representations of the sampled trees.}
 }
 \examples{
+
 \donttest{
+1+1
+}
+
 ############
 # True beta functions
 beta0_true <- function(Z){
@@ -104,28 +108,13 @@ beta2_true <- function(Z){
   return( (3 - 3*cos(6*pi*tmp_Z[,1]) * tmp_Z[,1]^2) * (tmp_Z[,1] > 0.6) - 
   (10 * sqrt(tmp_Z[,1])) * (tmp_Z[,1] < 0.25) )
 }
-beta3_true <- function(Z){
-  #return(rep(0, times = nrow(Z)))
-  return(rep(1, times = nrow(Z)))
-}
-beta4_true <- function(Z){
-  tmp_Z <- (Z+1)/2
-  return(10 * sin(pi * tmp_Z[,1] * tmp_Z[,2]) + 
-  20 * (tmp_Z[,3] - 0.5)^2 + 
-  10 * tmp_Z[,4] + 5 * tmp_Z[,5])
-}
-beta5_true <- function(Z){
-  tmp_Z <- (Z+1)/2
-  return(exp(sin((0.9 * (tmp_Z[,1] + 0.48))^10)) + 
-  tmp_Z[,2] * tmp_Z[,3] + tmp_Z[,4])
-}
+
 
 ################
-# Set up problem dimension
+# Set problem dimensions
 ###############
 n_train <- 250 
 n_test <- 25
-sigma <- 1
 
 set.seed(417)
 n_all <- n_train + n_test
@@ -133,74 +122,56 @@ ni_all <- rep(4, times = n_all) # 4 observations per subject
 subj_id_all <- rep(1:n_all, each = 4) # give every subject an id number
 N_all <- sum(ni_all) # total number of observations
 
-p <- 5 # number of covariates
+p <- 3 # number of covariates
 R_cont <- 20 # number of continuous modifiers
 R_cat <- 0 # number of categorical modifiers
 R <- R_cont + R_cat
+################
+# Generate covariates & modifiers
+################
 
-Sigma_X <-  (0.5)^(abs(outer(1:p, 1:p, FUN = "-"))) # covariates are all correlated
+X_all <- 
+  matrix(rnorm(N_all*p, mean = 0, sd = 1), nrow = N_all, ncol = p)
+Z_cont_all <- 
+  matrix(runif(N_all * R_cont, min = -1, max = 1), nrow = N_all, ncol = R_cont)
 
-X_all <- MASS::mvrnorm(N_all, mu = rep(0, times = p), Sigma = Sigma_X)
-Z_cont_all <- matrix(runif(N_all * R_cont, min = -1, max = 1), nrow = N_all, ncol = R_cont)
+################
+# Define true coefficient functions & noise level
+###############
 beta0_all <- beta0_true(Z_cont_all)
 beta1_all <- beta1_true(Z_cont_all)
 beta2_all <- beta2_true(Z_cont_all)
-beta3_all <- beta3_true(Z_cont_all)
-beta4_all <- beta4_true(Z_cont_all)
-beta5_all <- beta5_true(Z_cont_all)
+beta_all <- cbind(beta0_all, beta1_all, beta2_all)
+sigma <- 1
 
-beta_all <- cbind(beta0_all, beta1_all, beta2_all, 
-beta3_all, beta4_all, beta5_all)
-
-mu_all <- beta0_all + X_all[,1] * beta1_all + X_all[,2] * beta2_all +
-  X_all[,3] * beta3_all + X_all[,4] * beta4_all + X_all[,5] * beta5_all
+################
+# Generate response surface & outcomes
+###############
+mu_all <- beta0_all + X_all[,1] * beta1_all + X_all[,2] * beta2_all
 Y_all <- mu_all + sigma * rnorm(n = N_all, mean = 0, sd = 1)
 
+## Token run to ensure installation works
 
-#############
-# Create a training/testing split
-# since we randomly generated X and Z, 
-# we can just use first n_train subjects as train
-############
-train_subjects <- 1:n_train
-test_subjects <- (n_train+1):(n_train + n_test)
-
-test_index <- which(subj_id_all \%in\% test_subjects)
-train_index <- which(subj_id_all \%in\% train_subjects)
-
-ni_train <- ni_all[train_subjects]
-ni_test <- ni_all[test_subjects]
-
-N_train <- sum(ni_train)
-N_test <- sum(ni_test)
-
-X_train <- X_all[train_index,]
-X_test <- X_all[test_index,]
-
-Z_cont_train <- Z_cont_all[train_index,]
-Z_cont_test <- Z_cont_all[test_index,]
-subj_id_train <- rep(1:n_train, times = ni_train)
-
-Y_train <- Y_all[train_index]
-Y_test <- Y_all[test_index]
-
-beta_train <- beta_all[train_index,]
-beta_test <- beta_all[test_index,]
-
-fit <-
-  VCBART::VCBART_ind(Y_train = Y_train,
-                     subj_id_train = subj_id_train,
-                     ni_train = ni_train,
-                     X_train = X_train,
-                     Z_cont_train = Z_cont_train,
-                     X_test = X_test,
-                     Z_cont_test = Z_cont_test,
-                     verbose = FALSE)
-plot(c(beta_train, beta_test),
-     c(fit$betahat.train.mean, fit$betahat.test.mean),
-     xlab = "Actual", ylab = "Fitted")
-abline(a = 0, b = 1, col = 'blue')
+fit <- 
+  VCBART_ind(Y_train = Y_all,
+             subj_id_train = subj_id_all,
+             ni_train = ni_all,
+             X_train = X_all,
+             Z_cont_train = Z_cont_all,
+             nd = 5, burn = 5,
+             verbose = FALSE)
+             
+\donttest{
+## Longer example
+  fit <- 
+    VCBART_ind(Y_train = Y_all,
+               subj_id_train = subj_id_all,
+               ni_train = ni_all,
+               X_train = X_all,
+               Z_cont_train = Z_cont_all,
+               verbose = FALSE)
 }
+             
 }
 \references{
 Deshpande, S.K, Bai, R., Balocchi, C., Starling, J., and Weiss, J. (2024). VCBART: Bayesian trees for varying coefficients.

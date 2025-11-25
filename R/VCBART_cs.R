@@ -62,7 +62,6 @@ VCBART_cs <- function(Y_train,
   # Set some hyperparameters
   if(is.null(mu0)) mu0 <- rep(0, times = ncol(std_X_train))
   else if(length(mu0) != ncol(std_X_train)){
-    print(mu0)
     stop("mu0 needs to have length 1 + ncol(X_train)")
   } 
   
