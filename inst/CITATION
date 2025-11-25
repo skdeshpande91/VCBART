@@ -6,7 +6,7 @@ bibentry(bibtype="Manual",
              person("Jennifer", "Starling"),
              person("Jordan", "Weiss")),
   year = "2025",
-  note="R package version 1.2.0")
+  note="R package version 1.2.3")
 
 
 

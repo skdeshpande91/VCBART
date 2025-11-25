@@ -87,10 +87,6 @@ This function assumes that the within-subject errors are independent.
 }
 \examples{
 
-\donttest{
-1+1
-}
-
 ############
 # True beta functions
 beta0_true <- function(Z){
@@ -113,16 +109,14 @@ beta2_true <- function(Z){
 ################
 # Set problem dimensions
 ###############
-n_train <- 250 
-n_test <- 25
 
 set.seed(417)
-n_all <- n_train + n_test
+n_all <- 500
 ni_all <- rep(4, times = n_all) # 4 observations per subject
 subj_id_all <- rep(1:n_all, each = 4) # give every subject an id number
 N_all <- sum(ni_all) # total number of observations
 
-p <- 3 # number of covariates
+p <- 2 # number of covariates
 R_cont <- 20 # number of continuous modifiers
 R_cat <- 0 # number of categorical modifiers
 R <- R_cont + R_cat
@@ -142,13 +136,14 @@ beta0_all <- beta0_true(Z_cont_all)
 beta1_all <- beta1_true(Z_cont_all)
 beta2_all <- beta2_true(Z_cont_all)
 beta_all <- cbind(beta0_all, beta1_all, beta2_all)
-sigma <- 1
+sigma <- 0.1
 
 ################
 # Generate response surface & outcomes
 ###############
 mu_all <- beta0_all + X_all[,1] * beta1_all + X_all[,2] * beta2_all
 Y_all <- mu_all + sigma * rnorm(n = N_all, mean = 0, sd = 1)
+
 
 ## Token run to ensure installation works
 
@@ -170,6 +165,18 @@ fit <-
                X_train = X_all,
                Z_cont_train = Z_cont_all,
                verbose = FALSE)
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,2))
+plot(beta_all, fit$betahat.train.mean, 
+     pch = 16, cex = 0.5,
+     xlab = "Actual", ylab = "Posterior Mean",
+     main = "Coefficients")
+abline(a = 0, b = 1, col = 'blue')
+plot(mu_all, fit$yhat.train.mean,
+     pch = 16, cex = 0.5,
+     xlab = "Actual", ylab = "Posterior Mean",
+     main = "Regression Function E[Y|X,Z]")
+abline(a = 0, b = 1, col = 'blue')
 }
              
 }
