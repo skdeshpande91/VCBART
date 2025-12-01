@@ -166,6 +166,7 @@ fit <-
                Z_cont_train = Z_cont_all,
                verbose = FALSE)
 
+old <- par(no.readonly = TRUE)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0), mfrow = c(1,2))
 plot(beta_all, fit$betahat.train.mean, 
      pch = 16, cex = 0.5,
@@ -177,6 +178,8 @@ plot(mu_all, fit$yhat.train.mean,
      xlab = "Actual", ylab = "Posterior Mean",
      main = "Regression Function E[Y|X,Z]")
 abline(a = 0, b = 1, col = 'blue')
+
+par(old)
 }
              
 }
