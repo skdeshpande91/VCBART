@@ -184,6 +184,6 @@ par(oldpar)
              
 }
 \references{
-Deshpande, S.K, Bai, R., Balocchi, C., Starling, J., and Weiss, J. (2024). VCBART: Bayesian trees for varying coefficients.
-\emph{Bayesian Analysis}. \doi{doi:10.1214/24-BA1470}
+Deshpande, S.K, Bai, R., Balocchi, C., Starling, J., and Weiss, J. (2026). VCBART: Bayesian trees for varying coefficients.
+\emph{Bayesian Analysis}. 21(1):281--308. \doi{doi:10.1214/24-BA1470}
 }
