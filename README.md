@@ -21,16 +21,14 @@ devtools::install_github(repo = "skdeshpande91/VCBART").
 Alternatively, you can fork or clone this repository and then build & install the package directly from the command line (be sure run this from the directory itself).
 ```
 R CMD BUILD .
-R CMD INSTALL flexBART_1.2.0.tar.gz
+R CMD INSTALL VCBART_1.2.5.tar.gz
 ```
 
-If you are using macOS, you will need to have previously set up the macOS toolchain for R.
-This is typically something you have to do only once (and if you have used packages with **Rcpp** dependence, you probably already have done this).
-But in case you haven't and are unable to install **VCBART**, you might find the following links helpful:
+It is highly recommended that you install R version 4.0.0 or later before installing **VCBART**. Before installing **VCBART**, please ensure that you have set up an appropriate C++ toolchain for your system:
 
-  + [R for macOS](https://cran.r-project.org/bin/macosx/tools/) for more information.
-  + [Instructions from The Coatless Professor](https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/). Note that these instructions may not be relevant for later versions of macOS (e.g. ones shipped with an Apple silicon processor)
-  + [This StackOverflow post](https://stackoverflow.com/questions/69639782/installing-gfortran-on-macbook-with-apple-m1-chip-for-use-in-r/72997915#72997915), which outlines how to install the necessary C++ compiler, gfortran, and set the necessary paths. 
+  + For macOS, we recommend using the [**macrtools**](https://github.com/coatless-mac/macrtools) to set up your system
+  + For Windows, we recommend using Rtools, which can be downloaded [here](https://cran.r-project.org/bin/windows/Rtools/). Please make sure you download the version of Rtools corresponding to your R version (e.g., RTools45 for R version 4.5)
+  + For Linux, we recommend following [these instructions](https://github.com/stan-dev/rstan/wiki/Configuring-C-Toolchain-for-Linux) from the Stan Development Team
 
 
 ## Basic usage and reproducibility
